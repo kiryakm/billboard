@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Billboard</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <style>
+       table {
+           border-spacing: 10px 10px;
+       }
+       .tab{
+            transform: scale(0.2,0.2);  /*уменьшаю canvas-ы что бы поместились на страницу, из-за этого они скачут*/
+            position: relative;
+            top: -400px;
+            left: -400px;
+       }
+  </style>
+</head>
+<body>
+
+    <table>
+        <tr>
+            <td>
+                <select name = "form">
+                    <option value ="A7">A7</option>
+                    <option value ="A6">A6</option>
+                    <option value ="A5">A5</option>
+                    <option value ="A4">A4</option>
+                </select>
+                <p><input type = "radio" name = "choose" id = "1280x960" value = "1280x960" checked onchange = "change1280x960()">1280x960</p>
+            </td>
+            <td>
+                <p><input type = "radio" name = "choose" id = "hor" value = "hor" onchange = "change960x1280()">Horizontal</p>
+                <p><input type = "radio" name = "choose" id = "960x1280 "value = "960x1280" onchange = "change960x1280()">960x1280</p>
+            </td>
+            <td>
+                <p><input type = "radio" name = "choose" id = "vert" value = "vert" onchange = "change960x1280()">Vertical</p>
+                <input type="file" name = "file" id = "pic" accept="image/*" onchange="draw()">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p><input type = "radio" name = "choose" id = "1280x1920" value = "1280x1920" onchange = "change1280x1920()">1280x1920</p>
+            </td>
+            <td>
+                <p><input type = "radio" name = "choose" id = "1920x1280" value = "1920x1280" onchange="change1920x1280()">1920x1280</p>
+            </td>
+            <td>
+                <button onclick="send()">Submit</button>
+            </td>
+        </tr>
+    </table>
+    <table class = "tab">
+        <tr>
+            <td>
+                <canvas  id="canvas1" name="canvas" height="960" width="1280" style="border:1px solid #000000;"></canvas>
+            </td>
+            <td name = "canvas1920" >
+            </td>
+
+        </tr>
+        <tr>
+            <td name = "canvas1280">
+            </td>
+        </tr>
+    </table>
+
+    <script>
+          var send = function()   //посылаю на сервер json с картинкой закодированной в base64
+        {
+            var canvas1 = document.getElementById("canvas1");
+            var url = document.getElementById("canvas1").toDataURL();   //беру url картинки из canvas
+            var name;
+            for (var i = 0; i < document.getElementsByName('choose').length; i++) //получаю название картинки
+            {
+                if  (document.getElementsByName('choose')[i].checked == true)
+                {
+                    name = document.getElementsByName('choose')[i].value
+                    break;
+                }
+            }
+            upload(url, name, 1); // url - url картинки из canvas, name - название картинки, 1 - номер картинки
+            if (document.getElementById('canvas2') != null)   //если есть 2 канвас т.е. картинка больше 1280x960 посылаю вторую картинку
+            {
+                url = document.getElementById("canvas2").toDataURL();
+                upload(url, name, 2);
+            }
+        }
+
+        function upload(dataURL, name, num) //функция с ajax запросом
+        {
+            // формирую json
+            var data = {
+                data: "'" + dataURL + "'",
+                name: "" + name + "",
+                num: "" + num + ""
+                };
+            //отправляю json на сервер
+            $.ajax({
+                url: "/upload",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                type: 'POST'
+                });
+            }
+
+        // функции для изменения размеров canvas-ов и добавления 2-го если нужно
+        var change1280x960 = function()
+        {
+            var canvas1 = document.getElementById("canvas1");
+            var ctx = canvas1.getContext("2d");
+            canvas1.width = 1280;
+            canvas1.height = 960;
+            if (document.getElementById('canvas2') != null)
+                document.getElementById('canvas2').remove();
+            draw();
+        }
+
+        var change960x1280 = function()
+        {
+            var canvas1 = document.getElementById("canvas1");
+            canvas1.width = 960;
+            canvas1.height = 1280;
+            if (document.getElementById('canvas2') != null)
+                document.getElementById('canvas2').remove();
+            draw();
+        }
+
+        var change1280x1920 = function()
+        {
+            var canvas1 = document.getElementById("canvas1");
+            canvas1.width = 1280;
+            canvas1.height = 960;
+            if (document.getElementById('canvas2') != null)
+                document.getElementById('canvas2').remove();
+            var canvas2 = document.createElement("canvas");
+            canvas2.id = "canvas2";
+            canvas2.width = 1280;
+            canvas2.height = 960;
+            canvas2.style.border = "1px solid";
+            var body = document.getElementsByName("canvas1280")[0];
+            body.appendChild(canvas2);
+            draw();
+        }
+
+        var change1920x1280 = function()
+        {
+            var canvas1 = document.getElementById("canvas1");
+            canvas1.width = 960;
+            canvas1.height = 1280;
+            if (document.getElementById('canvas2') != null)
+                document.getElementById('canvas2').remove();
+            var canvas2 = document.createElement("canvas");
+            canvas2.id = "canvas2";
+            canvas2.width = 960;
+            canvas2.height = 1280;
+            canvas2.style.border = "1px solid";
+            var body = document.getElementsByName("canvas1920")[0];
+            body.appendChild(canvas2);
+            draw();
+        }
+
+        //отрисовка картинки
+        var draw = function()
+        {
+            var canvas1 = document.getElementById("canvas1");
+            var ctx1 = canvas1.getContext("2d");
+            ctx1.fillStyle = "#FFFFFF";
+            ctx1.fillRect(0,0, canvas1.width, canvas1.height);
+            if (document.getElementById('canvas2') != null)
+            {
+                var canvas2 = document.getElementById("canvas2");
+                var ctx2 = canvas2.getContext("2d");
+                ctx2.fillStyle = "#FFFFFF";
+                ctx2.fillRect(0,0, canvas2.width, canvas2.height);
+            }
+            pic = new Image();
+            pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
+            pic.onload = function()   //отрисовываю поверх белого фона на canvas
+            {
+                ctx1.drawImage(pic, 0, 0, pic.width, pic.height);
+                if ((document.getElementById('canvas2') != null) && (document.getElementById("1280x1920").checked==true))
+                    ctx2.drawImage(pic, 0, -(canvas1.height), pic.width, pic.height);
+                if ((document.getElementById('canvas2') != null) && (document.getElementById("1920x1280").checked==true))
+                    ctx2.drawImage(pic, -(canvas1.width), 0, pic.width, pic.height);
+            }
+        }
+    </script>
+</body>
+</html>
