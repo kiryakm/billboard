@@ -7,7 +7,14 @@
     <style>
        table {
            border-spacing: 7px 7px;
+					 z-index: 0;
+
+    border: 1px solid black; /* Рамка вокруг таблицы */
        }
+       td {
+  /*border-bottom:5pt solid black;*/
+}
+.can{z-index: 1;}
        .tab{
           /*  transform: scale(0.2,0.2);  /*уменьшаю canvas-ы что бы поместились на страницу, из-за этого они скачут*/
             position: relative;
@@ -15,50 +22,40 @@
             top: -400px;
             left: -400px;*/
        }
-       .zoom {
-  transform: perspective(100px) translateZ(-220px);
-}
+
   </style>
 </head>
-<body>
+
 
     <table>
         <tr>
             <td>
-                <select name = "form" id = "form" onchange = "changeForm()">
-                    <option value ="A7" id = "1">A7</option>
-                    <option value ="A6" id = "2">A6</option>
-                    <option value ="A5" id = "4">A5</option>
-                    <option value ="A4" id = "9">A4</option>
-                </select>
-                <p><input type = "radio" name = "choose" id = "1280x960" value = "1280x960" checked onchange = "change1280x960()">1280x960</p>
+                <p><input type = "radio" name = "choose" id = "hor" value = "hor" onchange = "makeTable()" >Horizontal</p>
             </td>
             <td>
-                <p><input type = "radio" name = "choose" id = "hor" value = "hor" onchange = "change960x1280()">Horizontal</p>
-                <p><input type = "radio" name = "choose" id = "960x1280 "value = "960x1280" onchange = "change960x1280()">960x1280</p>
+                <p><input type = "radio" name = "choose" id = "vert" value = "vert" onchange = "makeTable()">Vertical</p>
             </td>
-            <td>
-                <p><input type = "radio" name = "choose" id = "vert" value = "vert" onchange = "change960x1280()">Vertical</p>
-                <input type="file" name = "file" id = "pic" accept="image/*" onchange="draw()">
-            </td>
+		        <td rowspan="2">
+	              <canvas  id="origImg" name="origCanvas">
+		        </td>
         </tr>
         <tr>
-            <td>
-                <p><input type = "radio" name = "choose" id = "1280x1920" value = "1280x1920" onchange = "change1280x1920()">1280x1920</p>
-            </td>
-            <td>
-                <p><input type = "radio" name = "choose" id = "1920x1280" value = "1920x1280" onchange="change1920x1280()">1920x1280</p>
-            </td>
             <td>
                 <button onclick="send()">Submit</button>
             </td>
             <td>
-              <canvas  id="origImg" name="origCanvas">
+							<input type="file" name = "file" id = "pic" accept="image/*" onchange="makeTable()">
             </td>
         </tr>
+				<tr>
+					<td>
+						Quantity of screens:
+						<select name = "screens" id = "screens" onchange = "changeForm()">
+						</select>
+				</td>
+				</tr>
     </table>
-    <table id = "drawTable">
-    </table>
+		<!--
     <table class = "tab" >
         <tr>
             <td>
@@ -73,14 +70,190 @@
             </td>
         </tr>
     </table>
+		-->
+    <table id = "drawTable">
+    </table>
 
     <script>
-          var send = function()   //посылаю на сервер json с картинкой закодированной в base64
+
+				var origCanvas = document.getElementById('origImg');
+				origCanvas.addEventListener('click', on_canvas_click, false);
+				function on_canvas_click(ev) {
+					/*var box = document.getElementById("drag-box");
+					//box.style.height = "400px";
+					box.style.width = "400px";*/
+					var rect = origCanvas.getBoundingClientRect();
+//alert(rect.top+" "+rect.right+" "+rect.bottom+" "+rect.left);
+				    var x = ev.clientX - rect.left;
+				    var y = ev.clientY - rect.top;
+						alert(x+" "+y);
+
+
+				    // ... x,y are the click coordinates relative to the
+				    // canvas itself
+				}
+
+				function redraw(x, y)
+				{
+						var ctx = origCanvas.getContext("2d");
+
+						pic = new Image();
+						pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
+						ctx.fillStyle = "#FFFFFF";
+						ctx.fillRect(0,0, canvas.width, canvas.height);
+						var rect = origCanvas.getBoundingClientRect();
+					  var wx =pic.width/4- x/(pic.width/4));
+						var hx =pic.height/4- y/(pic.height/4));
+						pic.onload = function()   //отрисовываю поверх белого фона на canvas
+						{
+
+
+							ctx.drawImage(pic, 0, 0, pic.width/4, pic.height/4);
+						}
+				}
+
+        function makeTable()
         {
+            var height, width;
+            if  (document.getElementById("hor").checked==true)
+            {
+                height = 960;
+                width = 1280
+            }
+            if  (document.getElementById("vert").checked==true)
+            {
+                height = 1280;
+                width = 960
+            }
+            pic = new Image();
+            pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
+            var inum = Math.ceil(pic.height/height);
+            var jnum = Math.ceil(pic.width/width);
+            var table = document.getElementById('drawTable');
+						for (var i = 0; i < inum+jnum; i++)
+            {
+							var idRow= "tr"+i;
+							if (document.getElementById(idRow))
+								document.getElementById(idRow).remove();
+						}
+
+	          for (var i = 0; i < inum; i++)
+            {
+							var idRow= "tr"+i;
+							var newRow = document.createElement('tr');
+	            newRow.id = idRow;
+            	table.appendChild(newRow);
+              //newRow.insertCell(i);
+							for (var j = 0; j < jnum; j++)
+							{
+								var idCol = "td"+i+"_"+j;
+								var newCol = document.createElement('td');
+								newCol.id = idCol;
+								var str = '<canvas id="canvas'+ i + '_' + j + '" height="' + height/4 + '" width="'+ width/4 + '" style="border:1px solid #000000;"></canvas>'
+								newCol.innerHTML += str;
+								newRow.appendChild(newCol);
+
+							}
+            }
+					draw2(inum, jnum);
+        }
+
+				function draw2(inum, jnum)
+				{
+            pic = new Image();
+            pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
+						pic.onload = function()   //отрисовываю поверх белого фона на canvas
+						{
+
+							var origCan = document.getElementById("origImg");
+							var ctx = origCan.getContext("2d");
+							origCan.height = pic.height/4;
+							origCan.width = pic.width/4;
+							ctx.drawImage(pic, 0, 0, pic.width/4, pic.height/4);
+
+							var sumH = 0;
+							for (var i = 0; i < inum; i++)
+							{
+							var sumW = 0;
+								for (var j = 0; j < jnum; j++)
+								{
+									var canId = 'canvas'+ i + '_' + j;
+									var canvas = document.getElementById(canId);
+			            var ctx = canvas.getContext("2d");
+			            ctx.fillStyle = "#FFFFFF";
+			            ctx.fillRect(0,0, canvas.width, canvas.height);
+			            ctx.drawImage(pic, -(sumW), -(sumH), pic.width/4, pic.height/4);
+
+									sumW += canvas.width;
+								}
+							var canvas = document.getElementById("canvas0_0");
+							sumH += canvas.height;
+
+						}
+					}
+				}
+
+				function makeSelect(inum, jnum)
+				{
+            var select = document.getElementById("screens");
+						for (var i = inum; i > 0; i--)
+						{
+
+						}
+
+				}
+
+        var send = function()   //посылаю на сервер json с картинкой закодированной в base64
+        {
+						var inum = document.getElementById('drawTable').rows.length;
+						var jnum = document.getElementById('drawTable').rows[0].cells.length;
+						alert(inum+ ' '+ jnum);
             pic = new Image();
             pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
             pic.onload = function()   //отрисовываю поверх белого фона на canvas
             {
+							var sumH = 0;
+							for (var i = 0; i < inum; i++)
+							{
+							var sumW = 0;
+							var url;
+								for (var j = 0; j < jnum; j++)
+								{
+									var canId = 'canvas'+ i + '_' + j;
+									var canvas = document.getElementById(canId);
+									var ctx = canvas.getContext("2d");
+	                canvas.height = canvas.height*4;
+	                canvas.width = canvas.width*4;
+									ctx.fillStyle = "#FFFFFF";
+									ctx.fillRect(0,0, canvas.width, canvas.height);
+									ctx.drawImage(pic, -(sumW), -(sumH), pic.width, pic.height);
+	                url = document.getElementById(canId).toDataURL();   //беру url картинки из canvasar name;
+
+	                if  (document.getElementById('vert').checked == true)
+	                {
+	                	name = "Vert"+pic.width+"x"+pic.height+" "+i+"_"+j;
+	                }
+									if  (document.getElementById('hor').checked == true)
+	                {
+	                	name = "Hor"+pic.width+"x"+pic.height+" "+i+"_"+j;
+	                }
+
+	                upload(url, name); // url - url картинки из canvas, name - название картинки, 1 - номер картинки
+
+
+	                canvas.height = canvas.height/4;
+	                canvas.width = canvas.width/4;
+									ctx.fillStyle = "#FFFFFF";
+									ctx.fillRect(0,0, canvas.width, canvas.height);
+									ctx.drawImage(pic, -(sumW)/4, -(sumH)/4, pic.width/4, pic.height/4);
+																		sumW += canvas.width*4;
+								}
+							var canvas = document.getElementById("canvas0_0");
+							sumH += canvas.height*4;
+
+						}
+					}
+								/*
                 var canvas1 = document.getElementById("canvas1");
                 var url;
                 canvas1.height = canvas1.height*4;
@@ -117,17 +290,16 @@
                         url = document.getElementById("canvas2").toDataURL();
                         upload(url, name, 2);
                 }
-            }
+            }*/
 
         }
 
-        function upload(dataURL, name, num) //функция с ajax запросом
+        function upload(dataURL, name) //функция с ajax запросом
         {
             // формирую json
             var data = {
                 data: "'" + dataURL + "'",
-                name: "" + name + "",
-                num: "" + num + ""
+                name: "" + name + ""
                 };
             //отправляю json на сервер
             $.ajax({
@@ -137,6 +309,7 @@
                 data: JSON.stringify(data),
                 type: 'POST'
                 });
+								/*
                 if (num==1)
                 {
                     var canvas1 = document.getElementById("canvas1");
@@ -149,7 +322,7 @@
                     canvas2.height = canvas2.height/4;
                     canvas2.width = canvas2.width/4;
                 }
-                draw();
+                draw();*/
 
             }
 
