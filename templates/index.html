@@ -19,8 +19,8 @@
           /*  transform: scale(0.2,0.2);  /*уменьшаю canvas-ы что бы поместились на страницу, из-за этого они скачут*/
             position: relative;
             /*
-            top: -400px;
-            left: -400px;*/
+            top: -screenMult00px;
+            left: -screenMult00px;*/
        }
 
   </style>
@@ -30,67 +30,71 @@
     <table>
         <tr>
             <td>
-                <p><input type = "radio" name = "choose" id = "hor" value = "hor" onchange = "makeTable()" >Horizontal</p>
+                <p><input type = "radio" name = "choose" id = "hor" value = "hor" onchange = "makeTable(0,0)" >Horizontal</p>
             </td>
             <td>
-                <p><input type = "radio" name = "choose" id = "vert" value = "vert" onchange = "makeTable()">Vertical</p>
+                <p><input type = "radio" name = "choose" id = "vert" value = "vert" onchange = "makeTable(0,0)">Vertical</p>
             </td>
 		        <td rowspan="2">
-	              <canvas  id="origImg" name="origCanvas">
+	              <canvas  id="origImg" name="origCanvas" style="border:1px solid #000000;">
 		        </td>
         </tr>
         <tr>
             <td>
-                <button onclick="send()">Submit</button>
+                <button id="send" onclick="send()">Submit</button>
             </td>
             <td>
-							<input type="file" name = "file" id = "pic" accept="image/*" onchange="makeTable()">
+							<input type="file" name = "file" id = "pic" accept="image/*" onchange="makeTable(0,0)">
             </td>
         </tr>
 				<tr>
 					<td>
-						Quantity of screens:
-						<select name = "screens" id = "screens" onchange = "changeForm()">
-						</select>
+						<div id = "endRes"></div>
+	 				 	<div id = "quantOfScreens"></div>
+				</td>
+				<td>
+				</td>
+				<td>
+			 		<button onclick = "stretchOrigX()">Stretch to length</button>
+					<button onclick = "stretchOrigY()">Stretch to height</button>
+		 			<button onclick = "makeTable(0,0)">Original</button>
 				</td>
 				</tr>
     </table>
-		<!--
-    <table class = "tab" >
-        <tr>
-            <td>
-                <canvas id="canvas1" name="canvas" height="240" width="320" style="border:1px solid #000000;"></canvas>
-            </td>
-            <td name = "canvas1920" >
-            </td>
 
-        </tr>
-        <tr>
-            <td name = "canvas1280">
-            </td>
-        </tr>
-    </table>
-		-->
+		<button onclick = "stretchPrevX()">Stretch to length</button>
+		<button onclick = "stretchPrevY()">Stretch to height</button>
+
     <table id = "drawTable">
     </table>
 
     <script>
 
+				var multX = 0;
+				var multY = 0;
+				var screenMult = 4;
+
 				var origCanvas = document.getElementById('origImg');
-				origCanvas.addEventListener('click', on_canvas_click, false);
-				function on_canvas_click(ev) {
-					/*var box = document.getElementById("drag-box");
-					//box.style.height = "400px";
-					box.style.width = "400px";*/
+				var click = false;
+				origCanvas.addEventListener('mousedown', canvasDown, false);
+				origCanvas.addEventListener('mouseup', canvasUp, false);
+				origCanvas.addEventListener('mousemove', mouseMove, false);
+
+				function canvasDown(ev) {
+					click = true;
+				}
+				function canvasUp(ev) {
+					click = false;
+				}
+
+				function mouseMove(ev) {
+					if (click == true){
 					var rect = origCanvas.getBoundingClientRect();
-//alert(rect.top+" "+rect.right+" "+rect.bottom+" "+rect.left);
 				    var x = ev.clientX - rect.left;
 				    var y = ev.clientY - rect.top;
-						alert(x+" "+y);
-
-
-				    // ... x,y are the click coordinates relative to the
-				    // canvas itself
+						//alert(x+" "+y);
+						redraw(x, y);
+					}
 				}
 
 				function redraw(x, y)
@@ -99,20 +103,111 @@
 
 						pic = new Image();
 						pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
-						ctx.fillStyle = "#FFFFFF";
-						ctx.fillRect(0,0, canvas.width, canvas.height);
-						var rect = origCanvas.getBoundingClientRect();
-					  var wx =pic.width/4- x/(pic.width/4));
-						var hx =pic.height/4- y/(pic.height/4));
+
 						pic.onload = function()   //отрисовываю поверх белого фона на canvas
 						{
+							ctx.fillStyle = "#FFFFFF";
+							ctx.fillRect(0,0, origCanvas.width, origCanvas.height);
+							var rect = origCanvas.getBoundingClientRect();
+							var sm = 320/pic.height;
+						  multX = (1-x/(pic.width*sm));
+						  multY = multX;
+							var newY = (pic.height*sm) - multY * (pic.height*sm);
 
-
-							ctx.drawImage(pic, 0, 0, pic.width/4, pic.height/4);
+							ctx.drawImage(pic, 0, 0, x, newY);
+							makeTable(multX, multY)
 						}
 				}
 
-        function makeTable()
+				function drawOriginal(multX, multY)
+				{
+					pic = new Image();
+					pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
+					pic.onload = function()   //отрисовываю поверх белого фона на canvas
+					{
+					var origCan = document.getElementById("origImg");
+					var ctx = origCan.getContext("2d");
+					var sm = 320/pic.height;
+					//alert(sm);
+
+						origCan.height = pic.height*sm;
+						origCan.width = pic.width*sm;
+						//alert(origCan.width);
+						ctx.drawImage(pic, 0, 0, (origCan.width) - multX * (origCan.width), (origCan.height) - multY * (origCan.height));
+					}
+				}
+
+				function setScreenMult(inum, jnum)
+				{
+					if (inum <= 3 && jnum <= 3)
+						screenMult = 4;
+					if ((inum > 3 && inum <=6) || (jnum > 3 && jnum <=6))
+						screenMult = 6;
+					if ((inum > 6) || (jnum > 6))
+						screenMult = 8;
+					//alert(screenMult);
+				}
+
+				function stretchOrigX ()
+				{
+					var ctx = origCanvas.getContext("2d");
+
+					pic = new Image();
+					pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
+					pic.onload = function()   //отрисовываю поверх белого фона на canvas
+					{
+						ctx.fillStyle = "#FFFFFF";
+						ctx.fillRect(0,0, origCanvas.width, origCanvas.height);
+						//var rect = origCanvas.getBoundingClientRect();
+						var sm = 320/pic.height;
+						//multX = (1-x/(pic.width*sm));
+						//multY = multX;
+						var newY = (pic.height*sm) - multY * (pic.height*sm);
+						//alert(pic.width/screenMult + " "+newY);
+
+						ctx.drawImage(pic, 0, 0, origCanvas.width, newY);
+
+						alert(multX+ ' '+ multY);
+						multY=multX;
+						multX=0;
+						makeTable(multX, multY)
+					}
+				}
+
+				function stretchOrigY ()
+				{
+					var ctx = origCanvas.getContext("2d");
+
+					pic = new Image();
+					pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
+					pic.onload = function()   //отрисовываю поверх белого фона на canvas
+					{
+						ctx.fillStyle = "#FFFFFF";
+						ctx.fillRect(0,0, origCanvas.width, origCanvas.height);
+						//var rect = origCanvas.getBoundingClientRect();
+						var sm = 320/pic.height;	//для экранов примерно одного размера
+						//multX = (1-x/(pic.width*sm));
+						//multY = multX;
+						var newX = (pic.width*sm) - multX * (pic.width*sm);
+						//alert(pic.width/screenMult + " "+newY);
+
+						ctx.drawImage(pic, 0, 0, newX, origCanvas.height);
+						makeTable(multX, 0)
+					}
+				}
+
+				function stretchPrevX ()
+				{
+
+				}
+
+				function getResolution(height, width, inum, jnum)
+				{
+					document.getElementById("endRes").innerHTML = "Total resalution: " + width*jnum + "x" + height*inum;
+					document.getElementById("quantOfScreens").innerHTML = "Quantity of screens: " + inum*jnum;
+				}
+
+        function makeTable(multX, multY)
         {
             var height, width;
             if  (document.getElementById("hor").checked==true)
@@ -127,8 +222,11 @@
             }
             pic = new Image();
             pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
-            var inum = Math.ceil(pic.height/height);
-            var jnum = Math.ceil(pic.width/width);
+            var inum = Math.ceil((pic.height - multY * (pic.height))/height);
+            var jnum = Math.ceil((pic.width - multX * (pic.width))/width);
+						//alert(inum+" "+jnum);
+						setScreenMult(inum, jnum);
+						getResolution(height, width, inum, jnum);
             var table = document.getElementById('drawTable');
 						for (var i = 0; i < inum+jnum; i++)
             {
@@ -149,16 +247,16 @@
 								var idCol = "td"+i+"_"+j;
 								var newCol = document.createElement('td');
 								newCol.id = idCol;
-								var str = '<canvas id="canvas'+ i + '_' + j + '" height="' + height/4 + '" width="'+ width/4 + '" style="border:1px solid #000000;"></canvas>'
+								var str = '<canvas id="canvas'+ i + '_' + j + '" height="' + height/screenMult + '" width="'+ width/screenMult + '" style="border:1px solid #000000;"></canvas>'
 								newCol.innerHTML += str;
 								newRow.appendChild(newCol);
 
 							}
             }
-					draw2(inum, jnum);
+					draw(inum, jnum, multX, multY);
         }
 
-				function draw2(inum, jnum)
+				function draw(inum, jnum, multX, multY)
 				{
             pic = new Image();
             pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
@@ -167,9 +265,10 @@
 
 							var origCan = document.getElementById("origImg");
 							var ctx = origCan.getContext("2d");
-							origCan.height = pic.height/4;
-							origCan.width = pic.width/4;
-							ctx.drawImage(pic, 0, 0, pic.width/4, pic.height/4);
+								drawOriginal(multX, multY)
+							//origCan.height = pic.height/screenMult;
+							//origCan.width = pic.width/screenMult;
+							//ctx.drawImage(pic, 0, 0, (pic.width/screenMult) - mn * (pic.width/screenMult), (pic.height/screenMult) - mn * (pic.height/screenMult));
 
 							var sumH = 0;
 							for (var i = 0; i < inum; i++)
@@ -182,7 +281,7 @@
 			            var ctx = canvas.getContext("2d");
 			            ctx.fillStyle = "#FFFFFF";
 			            ctx.fillRect(0,0, canvas.width, canvas.height);
-			            ctx.drawImage(pic, -(sumW), -(sumH), pic.width/4, pic.height/4);
+			            ctx.drawImage(pic, -(sumW), -(sumH), (pic.width/screenMult) - multX * (pic.width/screenMult), (pic.height/screenMult) - multY * (pic.height/screenMult));
 
 									sumW += canvas.width;
 								}
@@ -193,21 +292,11 @@
 					}
 				}
 
-				function makeSelect(inum, jnum)
-				{
-            var select = document.getElementById("screens");
-						for (var i = inum; i > 0; i--)
-						{
-
-						}
-
-				}
-
-        var send = function()   //посылаю на сервер json с картинкой закодированной в base64
+        function send()   //посылаю на сервер json с картинкой закодированной в base6screenMult
         {
 						var inum = document.getElementById('drawTable').rows.length;
 						var jnum = document.getElementById('drawTable').rows[0].cells.length;
-						alert(inum+ ' '+ jnum);
+						alert(multX+ ' '+ multY);
             pic = new Image();
             pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
             pic.onload = function()   //отрисовываю поверх белого фона на canvas
@@ -222,11 +311,12 @@
 									var canId = 'canvas'+ i + '_' + j;
 									var canvas = document.getElementById(canId);
 									var ctx = canvas.getContext("2d");
-	                canvas.height = canvas.height*4;
-	                canvas.width = canvas.width*4;
+	                canvas.height = canvas.height*screenMult;
+	                canvas.width = canvas.width*screenMult;
 									ctx.fillStyle = "#FFFFFF";
 									ctx.fillRect(0,0, canvas.width, canvas.height);
-									ctx.drawImage(pic, -(sumW), -(sumH), pic.width, pic.height);
+									//alert(mn);
+									ctx.drawImage(pic, -(sumW), -(sumH), (pic.width) - multX * (pic.width), (pic.height) - multY * (pic.height));
 	                url = document.getElementById(canId).toDataURL();   //беру url картинки из canvasar name;
 
 	                if  (document.getElementById('vert').checked == true)
@@ -241,57 +331,18 @@
 	                upload(url, name); // url - url картинки из canvas, name - название картинки, 1 - номер картинки
 
 
-	                canvas.height = canvas.height/4;
-	                canvas.width = canvas.width/4;
+	                canvas.height = canvas.height/screenMult;
+	                canvas.width = canvas.width/screenMult;
 									ctx.fillStyle = "#FFFFFF";
 									ctx.fillRect(0,0, canvas.width, canvas.height);
-									ctx.drawImage(pic, -(sumW)/4, -(sumH)/4, pic.width/4, pic.height/4);
-																		sumW += canvas.width*4;
+									ctx.drawImage(pic, -(sumW)/screenMult, -(sumH)/screenMult, (pic.width/screenMult) - multX * (pic.width/screenMult), (pic.height/screenMult) - multY * (pic.height/screenMult));
+									sumW += canvas.width*screenMult;
 								}
 							var canvas = document.getElementById("canvas0_0");
-							sumH += canvas.height*4;
+							sumH += canvas.height*screenMult;
 
 						}
 					}
-								/*
-                var canvas1 = document.getElementById("canvas1");
-                var url;
-                canvas1.height = canvas1.height*4;
-                canvas1.width = canvas1.width*4;
-                var ctx1 = canvas1.getContext("2d");
-                ctx1.fillStyle = "#FFFFFF";
-                ctx1.fillRect(0,0, canvas1.width, canvas1.height);
-                ctx1.drawImage(pic, 0, 0, pic.width, pic.height);
-                url = document.getElementById("canvas1").toDataURL();   //беру url картинки из canvas
-                var name;
-                for (var i = 0; i < document.getElementsByName('choose').length; i++) //получаю название картинки
-                {
-                    if  (document.getElementsByName('choose')[i].checked == true)
-                    {
-                        name = document.getElementsByName('choose')[i].value
-                        break;
-                    }
-                }
-                upload(url, name, 1); // url - url картинки из canvas, name - название картинки, 1 - номер картинки
-
-                if (document.getElementById('canvas2') != null)   //если есть 2 канвас т.е. картинка больше 1280x960 посылаю вторую картинку
-                {
-                        var canvas2 = document.getElementById("canvas2");
-                        canvas2.height = canvas1.height*4;
-                        canvas2.width = canvas1.width*4;
-                        var ctx2 = canvas2.getContext("2d");
-                        ctx2.fillStyle = "#FFFFFF";
-                        ctx2.fillRect(0,0, canvas2.width, canvas2.height);
-                        if ((document.getElementById('canvas2') != null) && (document.getElementById("1280x1920").checked==true))
-                            ctx2.drawImage(pic, 0, -(canvas2.height), pic.width, pic.height);
-                        if ((document.getElementById('canvas2') != null) && (document.getElementById("1920x1280").checked==true))
-                            ctx2.drawImage(pic, -(canvas2.width), 0, pic.width, pic.height);
-
-                        url = document.getElementById("canvas2").toDataURL();
-                        upload(url, name, 2);
-                }
-            }*/
-
         }
 
         function upload(dataURL, name) //функция с ajax запросом
@@ -309,132 +360,8 @@
                 data: JSON.stringify(data),
                 type: 'POST'
                 });
-								/*
-                if (num==1)
-                {
-                    var canvas1 = document.getElementById("canvas1");
-                    canvas1.height = canvas1.height/4;
-                    canvas1.width = canvas1.width/4;
-                }
-                if (num==2)   //если есть 2 канвас т.е. картинка больше 1280x960 посылаю вторую картинку
-                {
-                    var canvas2 = document.getElementById("canvas2");
-                    canvas2.height = canvas2.height/4;
-                    canvas2.width = canvas2.width/4;
-                }
-                draw();*/
-
             }
 
-        function changeForm()
-        {/*
-            var form = document.getElementById("form");
-            var quant = form.options[form.selectedIndex].id;
-            var table = document.getElementById("drawTable");
-            var canvas[quant][quant];
-            for (var i = 0; i < quant; i++)
-            {
-              for (var j = 0; j < quant; j++)
-              {
-                  var row = table.insertRow(j);
-                  canvas[i][j] = document.createElement("canvas");
-                  canvas[i][j].id = "canvas2";
-                  canvas[i][j].width = 240;
-                  canvas[i][j].height = 320;
-                  canvas[i][j].style.border = "1px solid";
-              }
-            }
-            */
-        }
-        // функции для изменения размеров canvas-ов и добавления 2-го если нужно
-        var change1280x960 = function()
-        {
-            var canvas1 = document.getElementById("canvas1");
-            var ctx = canvas1.getContext("2d");
-            canvas1.width = 320;
-            canvas1.height = 240;
-            if (document.getElementById('canvas2') != null)
-                document.getElementById('canvas2').remove();
-            draw();
-        }
-
-        var change960x1280 = function()
-        {
-            var canvas1 = document.getElementById("canvas1");
-            canvas1.width = 240;
-            canvas1.height = 320;
-            if (document.getElementById('canvas2') != null)
-                document.getElementById('canvas2').remove();
-            draw();
-        }
-
-        var change1280x1920 = function()
-        {
-            var canvas1 = document.getElementById("canvas1");
-            canvas1.width = 320;
-            canvas1.height = 240;
-            if (document.getElementById('canvas2') != null)
-                document.getElementById('canvas2').remove();
-            var canvas2 = document.createElement("canvas");
-            canvas2.id = "canvas2";
-            canvas2.width = 320;
-            canvas2.height = 240;
-            canvas2.style.border = "1px solid";
-            var body = document.getElementsByName("canvas1280")[0];
-            body.appendChild(canvas2);
-            draw();
-        }
-
-        var change1920x1280 = function()
-        {
-            var canvas1 = document.getElementById("canvas1");
-            canvas1.width = 240;
-            canvas1.height = 320;
-            if (document.getElementById('canvas2') != null)
-                document.getElementById('canvas2').remove();
-            var canvas2 = document.createElement("canvas");
-            canvas2.id = "canvas2";
-            canvas2.width = 240;
-            canvas2.height = 320;
-            canvas2.style.border = "1px solid";
-            var body = document.getElementsByName("canvas1920")[0];
-            body.appendChild(canvas2);
-            draw();
-        }
-
-        //отрисовка картинки
-        var draw = function()
-        {
-            pic = new Image();
-            pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
-            var origCan = document.getElementById("origImg");
-            var ctx = origCan.getContext("2d");
-            origImg.src = URL.createObjectURL(document.getElementById('pic').files[0]);
-            var canvas1 = document.getElementById("canvas1");
-            var ctx1 = canvas1.getContext("2d");
-            ctx1.fillStyle = "#FFFFFF";
-            ctx1.fillRect(0,0, canvas1.width, canvas1.height);
-            if (document.getElementById('canvas2') != null)
-            {
-                var canvas2 = document.getElementById("canvas2");
-                var ctx2 = canvas2.getContext("2d");
-                ctx2.fillStyle = "#FFFFFF";
-                ctx2.fillRect(0,0, canvas2.width, canvas2.height);
-            }
-            pic.onload = function()   //отрисовываю поверх белого фона на canvas
-            {
-                //отрисовка орингинала
-                origCan.height = pic.height/4;
-                origCan.width = pic.width/4;
-                ctx.drawImage(pic, 0, 0, pic.width/4, pic.height/4);
-                //отрисовка порезанных
-                ctx1.drawImage(pic, 0, 0, pic.width/4, pic.height/4);
-                if ((document.getElementById('canvas2') != null) && (document.getElementById("1280x1920").checked==true))
-                    ctx2.drawImage(pic, 0, -(canvas1.height), pic.width/4, pic.height/4);
-                if ((document.getElementById('canvas2') != null) && (document.getElementById("1920x1280").checked==true))
-                    ctx2.drawImage(pic, -(canvas1.width), 0, pic.width/4, pic.height/4);
-            }
-        }
     </script>
 </body>
 </html>
