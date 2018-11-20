@@ -49,6 +49,7 @@
         </tr>
 				<tr>
 					<td>
+						<div id = "picRes"></div>
 						<div id = "endRes"></div>
 	 				 	<div id = "quantOfScreens"></div>
 				</td>
@@ -64,6 +65,7 @@
 
 		<button onclick = "stretchPrevX()">Stretch to length</button>
 		<button onclick = "stretchPrevY()">Stretch to height</button>
+		<button onclick = "stretchPrevXY()">Maximum stretch</button>
 
     <table id = "drawTable">
     </table>
@@ -167,7 +169,7 @@
 
 						ctx.drawImage(pic, 0, 0, origCanvas.width, newY);
 
-						alert(multX+ ' '+ multY);
+						//alert(multX+ ' '+ multY);
 						multY=multX;
 						multX=0;
 						makeTable(multX, multY)
@@ -192,18 +194,85 @@
 						//alert(pic.width/screenMult + " "+newY);
 
 						ctx.drawImage(pic, 0, 0, newX, origCanvas.height);
-						makeTable(multX, 0)
+						multY=0;
+						makeTable(multX, multY)
 					}
 				}
 
 				function stretchPrevX ()
 				{
+				pic = new Image();
+				pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
+					var height, width;
+					if  (document.getElementById("hor").checked==true)
+					{
+							height = 960;
+							width = 1280
+					}
+					if  (document.getElementById("vert").checked==true)
+					{
+							height = 1280;
+							width = 960
+					}
+						var jnum = document.getElementById('drawTable').rows[0].cells.length;
+						var inum = document.getElementById('drawTable').rows.length;
+						/*alert(multX);
+						multX =((width*jnum-pic.width*(1-multX))/(width*jnum));
+						alert(-multX-1);*/
+						draw(inum, jnum, multX, multY,1);
+
+				}
+
+				function stretchPrevY ()
+				{
+				pic = new Image();
+				pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
+					var height, width;
+					if  (document.getElementById("hor").checked==true)
+					{
+							height = 960;
+							width = 1280
+					}
+					if  (document.getElementById("vert").checked==true)
+					{
+							height = 1280;
+							width = 960
+					}
+						var jnum = document.getElementById('drawTable').rows[0].cells.length;
+						var inum = document.getElementById('drawTable').rows.length;
+						//multY =(height*inum-pic.height*(1-multY))/(height*inum);
+						draw(inum, jnum, multX, multY,2);
+
+				}
+
+				function stretchPrevXY ()
+				{
+					pic = new Image();
+					pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
+						var height, width;
+						if  (document.getElementById("hor").checked==true)
+						{
+								height = 960;
+								width = 1280
+						}
+						if  (document.getElementById("vert").checked==true)
+						{
+								height = 1280;
+								width = 960
+						}
+							var jnum = document.getElementById('drawTable').rows[0].cells.length;
+							var inum = document.getElementById('drawTable').rows.length;
+							//multY =(height*inum-pic.height*(1-multY))/(height*inum);
+							draw(inum, jnum, multX, multY,3);
 
 				}
 
 				function getResolution(height, width, inum, jnum)
 				{
-					document.getElementById("endRes").innerHTML = "Total resalution: " + width*jnum + "x" + height*inum;
+					pic = new Image();
+					pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
+					document.getElementById("picRes").innerHTML = "Uploaded image resalution: " + pic.width + "x" + pic.height;
+					document.getElementById("endRes").innerHTML = "Resalution of screens: " + width*jnum + "x" + height*inum;
 					document.getElementById("quantOfScreens").innerHTML = "Quantity of screens: " + inum*jnum;
 				}
 
@@ -253,16 +322,27 @@
 
 							}
             }
-					draw(inum, jnum, multX, multY);
+					draw(inum, jnum, multX, multY, 0);
         }
 
-				function draw(inum, jnum, multX, multY)
+				function draw(inum, jnum, multX, multY, n)
 				{
+            var height, width;
+            if  (document.getElementById("hor").checked==true)
+            {
+                height = 960;
+                width = 1280
+            }
+            if  (document.getElementById("vert").checked==true)
+            {
+                height = 1280;
+                width = 960
+            }
             pic = new Image();
+							//alert("indraw");
             pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); //беру загруженную картинку
 						pic.onload = function()   //отрисовываю поверх белого фона на canvas
 						{
-
 							var origCan = document.getElementById("origImg");
 							var ctx = origCan.getContext("2d");
 								drawOriginal(multX, multY)
@@ -281,8 +361,14 @@
 			            var ctx = canvas.getContext("2d");
 			            ctx.fillStyle = "#FFFFFF";
 			            ctx.fillRect(0,0, canvas.width, canvas.height);
-			            ctx.drawImage(pic, -(sumW), -(sumH), (pic.width/screenMult) - multX * (pic.width/screenMult), (pic.height/screenMult) - multY * (pic.height/screenMult));
-
+									if (n == 0)
+										ctx.drawImage(pic, -(sumW), -(sumH), (pic.width/screenMult) - multX * (pic.width/screenMult), (pic.height/screenMult) - multY * (pic.height/screenMult));
+									if (n == 1)
+										ctx.drawImage(pic, -(sumW), -(sumH), (jnum*width/screenMult) , (pic.height/screenMult) - multY * (pic.height/screenMult));
+									if (n == 2)
+										ctx.drawImage(pic, -(sumW), -(sumH), (pic.width/screenMult) - multX * (pic.width/screenMult), (inum*height/screenMult));
+									if (n == 3)
+										ctx.drawImage(pic, -(sumW), -(sumH), (jnum*width/screenMult), (inum*height/screenMult));
 									sumW += canvas.width;
 								}
 							var canvas = document.getElementById("canvas0_0");
