@@ -1,8 +1,31 @@
 from flask import Flask, render_template, request
+from ftplib import FTP
 import base64
 import re
+import os
+import subprocess
+
+from loader import *
+
+
 
 app = Flask(__name__)
+
+
+
+
+# ftp = FTP('')
+# ftp.login()
+#
+# data = []
+#
+# ftp.dir(data.append)
+# ftp.quit()
+#
+# for line in data:
+#     print
+#     "-", line
+
 
 @app.route('/upload', methods=['GET', 'POST'])  #загрузка картинки
 def upload():
@@ -15,9 +38,26 @@ def upload():
         fh.write(base64.b64decode(img))
     return render_template("index.html")
 
+@app.route('/send', methods=['GET', 'POST'])  #загрузка картинки
+def send():
+    print("sending")
+    #subprocess.Popen([r"C:\Users\Yakimenko.K.A\source\repos\makeBinScript\makeBinScript\bin\Release\makeBinScript.exe"])
+    #os.system('"C:/Users/Yakimenko.K.A/source/repos/makeBinScript/makeBinScript/bin/Release/makeBinScript.exe"')
+    # Connect()
+    # ClearScreen(15)
+    # p = "C:/Users/Yakimenko.K.A/Documents/PyProjects/billboard/img/"
+    # path = list()
+    # for root, dirs, files in os.walk(p):
+    #     for filename in files:
+    #         path.append(p + filename)
+    # print(path[0])
+    # makeData(path[0], 0, 0, 0, 2, 0, 0, False, True)
+    print("send")
+
 @app.route('/')
 def index():
     return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug = True)
+
