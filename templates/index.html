@@ -2,10 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Billboard</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-	<script src="{{url_for('static', filename='js/load-image.all.min.js')}}"></script>
-    <style>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+	<style>
        table
 			{
 				 border-spacing: 7px 7px;
@@ -14,6 +18,7 @@
        		}
   	</style>
 </head>
+
     <table>
         <tr>
             <td>
@@ -22,9 +27,12 @@
             <td>
                 <p><input type = "radio" name = "choose" id = "vert" value = "vert" onchange = "makeTable(0,0), drawOriginal(0,0)">Vertical</p>
             </td>
-		        <td rowspan="2">
-	              <canvas  id="origImg" name="origCanvas" style="border:1px solid #000000;">
-		        </td>
+			<td>
+				<button onclick = "stretchOrigX()">Stretch to length</button>
+				<button onclick = "stretchOrigY()">Stretch to height</button>
+		 		<button onclick = "makeTable(0,0), drawOriginal(0,0)">Original</button>
+		 		<button onclick = "rotate()">Rotate</button>
+			</td>
         </tr>
         <tr>
             <td>
@@ -42,11 +50,8 @@
 			</td>
 			<td>
 			</td>
-			<td>
-				<button onclick = "stretchOrigX()">Stretch to length</button>
-				<button onclick = "stretchOrigY()">Stretch to height</button>
-		 		<button onclick = "makeTable(0,0), drawOriginal(0,0)">Original</button>
-		 		<button onclick = "rotate()">Rotate</button>
+			<td rowspan="2">
+				<canvas  id="origImg" name="origCanvas" style="border:1px solid #000000;"></canvas>
 			</td>
 		</tr>
     </table>
@@ -56,8 +61,7 @@
 	<button onclick = "stretchPrevXY()">Maximum stretch</button>
 
     <table id = "drawTable">
-    </table>
-
+	</table>
     <script>
 
 		var multX = 0;		// Множитель по X
@@ -387,51 +391,45 @@
 		function drawing(canvas, pic, sumW, sumH, inum, jnum, multX, multY, screenDiv, height, width, mode)
 		{
 			var ctx = canvas.getContext("2d");
+			if (rotation == 0)
+			{					
+				offsetX = 0;
+				offsetY = 0;
+			}
+			if (rotation == 1)
+			{
+				offsetX = 0;					
+				offsetY = jnum * width / screenDiv - (-multY+1) * pic.height/screenDiv;
+			}
+			if (rotation == 2)
+			{
+				offsetX = jnum * width / screenDiv - (-multX+1) * pic.width/screenDiv;
+				offsetY = inum * height / screenDiv - (-multY+1) * pic.height/screenDiv;
+			}
+			if (rotation == 3)
+			{
+				offsetX = inum * height / screenDiv - (-multX+1) * pic.width/screenDiv;					
+				offsetY = 0;
+			}
 			if (mode == 0)
 			{
-				ctx = rotateCtx(canvas);
-				/*
-				var offsetX;
-				var offsetY;
-				if (rotation == 0)
-				{					
-					offsetX = 0;
-					offsetY = 0;
-				}
-				if (rotation == 1)
-				{
-					offsetX = 0;					
-					offsetY = jnum * width / screenDiv -  pic.height/screenDiv;
-				}
-				if (rotation == 2)
-				{
-					offsetX = jnum * width / screenDiv - pic.width/screenDiv;
-					offsetY = inum * height / screenDiv - pic.height/screenDiv;
-				}
-				if (rotation == 3)
-				{
-					offsetX = jnum * width / screenDiv - pic.height/screenDiv;					
-					offsetY = 0;
-				}
+				ctx = rotateCtx(canvas);			
 				ctx.drawImage(pic, -(sumW)+offsetX, -(sumH)+offsetY, (pic.width/screenDiv) - multX * (pic.width/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
-				*/				
-				ctx.drawImage(pic, -(sumW), -(sumH), (pic.width/screenDiv) - multX * (pic.width/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
-
-				return;
+				//ctx.drawImage(pic, -(sumW), -(sumH), (pic.width/screenDiv) - multX * (pic.width/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
 			}
 			if (mode == 1)
 			{
 				if (rotation == 0 || rotation == 2)
-					ctx.drawImage(pic, -(sumW), -(sumH), (jnum*width/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
+					ctx.drawImage(pic, -(sumW), -(sumH)+offsetY, (jnum*width/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
 				if (rotation == 1 || rotation == 3)
-					ctx.drawImage(pic, -(sumW), -(sumH), (inum*height/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
+					ctx.drawImage(pic, -(sumW)+offsetX, -(sumH)+offsetY, (inum*height/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
 			}
 			if (mode == 2)
 			{
 				if (rotation == 0 || rotation == 2)
-					ctx.drawImage(pic, -(sumW), -(sumH), (pic.width/screenDiv) - multX * (pic.width/screenDiv), (inum*height/screenDiv));
+					ctx.drawImage(pic, -(sumW)+offsetX, -(sumH), (pic.width/screenDiv) - multX * (pic.width/screenDiv), (inum*height/screenDiv));
 				if (rotation == 1 || rotation == 3)
-					ctx.drawImage(pic, -(sumW), -(sumH), (pic.width/screenDiv) - multX * (pic.width/screenDiv), (jnum*width/screenDiv));	
+					ctx.drawImage(pic, -(sumW)+offsetX, -(sumH), (pic.width/screenDiv) - multX * (pic.width/screenDiv), (jnum*width/screenDiv));	
 			}
 			if (mode == 3)
 			{
@@ -513,12 +511,12 @@
 				}
 			}
             pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); 
-			/*
+			
 			 $.ajax({
                 url: "/send",
                 type: 'GET'
                 });
-			*/
+			
 
         }
 		

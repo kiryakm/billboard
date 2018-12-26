@@ -4,6 +4,7 @@ import time
 import sys
 import os
 from PIL import Image
+import datetime
 
 DataPack = list()
 RawData = list()
@@ -37,10 +38,13 @@ def Connect():
 
 def SendData(data):
     if data == None:
+        print("Data is none")
         return
     if len(data) < 1:
+        print("No data")
         return
     if _port == None:
+        print("Port is none")
         return
     if _port.is_open == False:
         print("Port is close")
@@ -72,7 +76,7 @@ def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packe
     w = 0
     h = 0
     if typeOfFile == ".png":
-        print(typeOfFile)
+        #print(typeOfFile)
         img = Image.open(path)
         w, h = img.size
         Image_Data = bytearray(img.tobytes())
@@ -93,7 +97,7 @@ def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packe
     else:
         full = 0x00
     DataPack.append(full | (rotationAngle << 4) | wave)
-    print(DataPack)
+    #print(DataPack)
 
     def int_to_bytes(value, length):
         result = []
@@ -130,8 +134,10 @@ def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packe
     buff_b = [None] * w
     buff_w = [None] * w
 
+    temp = 0
     i = 0
-    while (i < len(Image_Data) - offset):
+    #print(len(Image_Data))
+    while i < len(Image_Data) - offset:
         if Packed == True:
             if i < len(Image_Data) - offset:
                 if typeOfFile == ".png":
@@ -154,9 +160,12 @@ def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packe
                             buff_r[ii_] = Image_Data[i + 2]
                             buff_g[ii_] = Image_Data[i + 0]
                             buff_b[ii_] = Image_Data[i + 1]
-                            buff_w[ii_] = round(((((buff_r[ii_] & 0x00) >> 4) +
-                                                  ((buff_g[ii_] & 0xFF) >> 4) +
-                                                  ((buff_b[ii_] & 0xFF) >> 4)) / 3))
+                            buff_w[ii_] = round(((((buff_r[ii_] & 0xFF) >> 4) +
+                                                  ((buff_g[ii_] & 0x00) >> 4) +
+                                                  ((buff_b[ii_] & 0x00) >> 4)) / 3))
+                            # buff_w[ii_] = round(((((buff_r[ii_] & 0x00) >> 4) +
+                            #                       ((buff_g[ii_] & 0xFF) >> 4) +
+                            #                       ((buff_b[ii_] & 0xFF) >> 4)) / 3))
                         if rotationAngle == 3:
                             buff_r[ii_] = Image_Data[i + 2]
                             buff_g[ii_] = Image_Data[i + 1]
@@ -167,20 +176,28 @@ def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packe
 
                         # buff_w[ii_] = round(((((buff_r[ii_] & 0xFF) >> 4) + ((buff_g[ii_] & 0xFF) >> 4) + ((buff_b[ii_] & 0xFF) >> 4)) / 3)+ (black) & ~(white))
                         i += 8
+
                     for ii_ in range(round(w / 2)):
                         DataPack.append((buff_r[ii_] & 0xF0) | ((buff_b[ii_] & 0xF0) >> 4))
 
                     for ii_ in range(round(w / 2)):
                         DataPack.append((((buff_w[ii_]) & 0x0F) << 4) | ((buff_g[ii_] & 0xF0) >> 4))
-        #else: Unpacked работает для .pgm формата я его не добавлял
-        if i % w == 0:
-            SendData(DataPack)
-            DataPack.clear()
+                        # DataPack.append((((buff_w[ii_]) & 0x0F) << 4) | ((buff_g[ii_] & 0xF0) >> 4))
 
+
+        #else: Unpacked работает для .pgm формата я его не добавлял
+        #if i % w == 0:
+            # SendData(DataPack)
+            # DataPack.clear()
+
+    SendData(DataPack)
+    DataPack.clear()
     DataPack.append(0x00)
     DataPack.append(0x00)
     SendData(DataPack)
     DataPack.clear()
+    _port.close()
+
 
 
 # Connect()
@@ -191,12 +208,26 @@ def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packe
 #     for filename in files:
 #         path.append(p + filename)
 # print(path[0])
+# img = Image.open(path[0])
+# width, height = img.size
+#
 # xCoord = 0
 # yCoord = 0
-# rotationAngle = 0   # 0-0 1-90 2-180 3-270
+# rotationAngle = 2   # 0-0 1-90 2-180 3-270
 # wave = 2            # 0 - 3 bit 0 - init_clear 1 - refresh 2 - delta 3 - refresh_mono 4 - delta_mono
-# black = 0           # Черная корректировка значения: 0-15
+# black = 0           # Черная корректировка значения: 0-15 в коде не использую если надо то можно добавить
 # white = 0           # Белая корректировка значения: 0-15 в коде не использую если надо то можно добавить
 # Partial = False
 # Packed = True
-# Load(path[0], xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packed)
+#
+# Load(path[0], 0, 0, rotationAngle, wave, black, white, Partial, Packed)
+#
+# # print(datetime.datetime.now())
+# # y = 0
+# # while y < 960:
+# #     x = 0
+# #     while x < 1280:
+# #         Load(path[0], x, y, rotationAngle, wave, black, white, Partial, Packed)
+# #         x += width
+# #     y += height
+# # print(datetime.datetime.now())
