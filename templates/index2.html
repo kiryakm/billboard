@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Billboard</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src = "{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+
+<body>
+<div class="row justify-content-center rowsHead "  >
+    <div class = "col-2 infHead"> <h1>Information</h1></div>
+    <div class = "col-4 imgHead"> <h1>Original image</h1></div>
+    <div class = "col-6 imgHead"> <h1>Screen preview</h1></div>
+</div>
+<div class="container-fluid h-100">
+    <div class="row justify-content-center h-100 rows" >
+        <div class = "col-2 inform" >
+            <p><p><input type = "radio" name = "choose" id = "hor" value = "hor" onchange = "makeTable(0,0), drawOriginal(0,0)" > Horizontal</p></p>
+            <p><input type = "radio" name = "choose" id = "vert" value = "vert" onchange = "makeTable(0,0), drawOriginal(0,0)"> Vertical</p>
+
+            <label for="pic" class="buttonInf"><i class="fa fa-cloud-upload"></i> Upload</label>
+            <p><input type="file"  name = "file" id = "pic" accept="image/*" onchange="makeTable(0,0), drawOriginal(0,0)"/></p>
+
+            <div id = "picRes"></div>
+            <div id = "endRes"></div>
+            <div id = "quantOfScreens"></div>
+            
+            <p><p><button id="send" onclick="send(0, 0)", class = "buttonInf"><i class="fa fa-check"></i> Submit</button></p></p>
+
+        </div>
+        <div class = "col-4 origImg">
+            <button class = "buttonImg" onclick = "stretchOrigX()"><i class="fa fa-arrows-h"></i></button>
+            <button class = "buttonImg" onclick = "stretchOrigY()"><i class="fa fa-arrows-v"></i></button>
+            <button class = "buttonImg" onclick = "makeTable(0,0), drawOriginal(0,0)"><i class="fa fa-expand"></i></button>
+
+            <button class = "buttonImg" onclick = "rotate()", class = "buttonRotate"><i class="fa fa-rotate-right"></i></button>
+
+            <p><canvas  id="origImg" name="origCanvas" style="border:1px solid #000000;"></canvas></p>
+        </div>
+        <div class = "col-6 screenImg">
+            <button class = "buttonImg" onclick = "stretchPrevX()"><i class="fa fa-arrows-h"></i></button>
+            <button class = "buttonImg" onclick = "stretchPrevY()"><i class="fa fa-arrows-v"></i></button>
+            <button class = "buttonImg" onclick = "stretchPrevXY()"><i class="fa fa-expand"></i></button>
+
+            <table id = "drawTable" class = "drawTable"></table>
+        </div>
+    </div>
+</div>
+
+<script>
+    var origCanvas = document.getElementById('origImg');
+    var click = false;
+    origCanvas.addEventListener('mousedown', canvasDown, false);
+    origCanvas.addEventListener('mouseup', canvasUp, false);
+    origCanvas.addEventListener('mousemove', mouseMove, false);
+</script>
+</body>
+</html>

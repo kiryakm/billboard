@@ -4,64 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Billboard</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
+	
 	<style>
-       table
+		body, html{height:100%; background-color:   #fdfefe  }
+       .mainTable
 			{
-				 border-spacing: 7px 7px;
-				 z-index: 0;
-				 border: 1px solid black; /* Рамка вокруг таблицы */
+				/*border-collapse: separate;
+ 				/*border-spacing: 10px 0;*/
+				 height: 100%
+				
        		}
+			 .infTd {
+				background-color:  #222d32;
+					color: white;
+			 }
+			 .infHeader {
+				background-color:  #3a80a7 ;
+					color: white;
+					height:7%;
+					width:10%;
+
+			 }
+			 .imgHeader1 {
+				background-color:  #408eba ;
+					color: white;
+					height:7%;
+					width:40%;
+			 }
+			 .imgHeader2 {
+				background-color:  #408eba ;
+					color: white;
+					height:7%;
+					width:50%;
+			 }
+		.drawTable
+			{
+				border-spacing: 7px 7px;
+				/*border: 1px solid black; /* Рамка вокруг таблицы */
+       		}
+			   .buttonInInf {
+					background-color: #494d4e; /* Green */
+					border: none;
+					color: white;
+					padding: 10px 20px;
+					text-align: center;
+					text-decoration: none;
+					display: inline-block;
+					font-size: 16px;
+				}	
+
+				input[type="file"] {
+					display: none;
+				}
+				.buttonImg {
+					background-color:  #1b2631 ; /* Green */
+					border: none;
+					color: white;
+					height:35px;
+    				width:35px;
+					text-align: center;
+					text-decoration: none;
+					display: inline-block;
+					font-size: 16px;
+				}
   	</style>
 </head>
 
-    <table>
-        <tr>
-            <td>
-                <p><input type = "radio" name = "choose" id = "hor" value = "hor" onchange = "makeTable(0,0), drawOriginal(0,0)" >Horizontal</p>
-            </td>
-            <td>
-                <p><input type = "radio" name = "choose" id = "vert" value = "vert" onchange = "makeTable(0,0), drawOriginal(0,0)">Vertical</p>
-            </td>
-			<td>
-				<button onclick = "stretchOrigX()">Stretch to length</button>
-				<button onclick = "stretchOrigY()">Stretch to height</button>
-		 		<button onclick = "makeTable(0,0), drawOriginal(0,0)">Original</button>
-		 		<button onclick = "rotate()">Rotate</button>
-			</td>
-        </tr>
-        <tr>
-            <td>
-                <button id="send" onclick="send()">Submit</button>
-            </td>
-            <td>
-				<input type="file" name = "file" id = "pic" accept="image/*" onchange="makeTable(0,0), drawOriginal(0,0)">
-            </td>
-        </tr>
-		<tr>
-			<td>
+    <table class = "mainTable">
+		<tr align="center">
+			<th class = "infHeader"  width="10%">
+				<h3>Information</h3>
+			</th>
+			<th class = "imgHeader1" width="30%">
+				<h3>Original Image</h3>
+			</th>
+			<th class = "imgHeader2"  width="60%">
+				<h3>Screen preview</h3>
+			</th>
+		</tr>
+        <tr align="center">
+            <td class = "infTd" valign="top"   >
+                <p><input type = "radio" name = "choose" id = "hor" value = "hor" onchange = "makeTable(0,0), drawOriginal(0,0)" > Horizontal</p>
+				<p><input type = "radio" name = "choose" id = "vert" value = "vert" onchange = "makeTable(0,0), drawOriginal(0,0)"> Vertical</p>
+				<label for="pic" class="buttonInInf">
+						<i class="fa fa-cloud-upload"></i> Upload
+					</label>
+				<p><input type="file"  name = "file" id = "pic" accept="image/*" onchange="makeTable(0,0), drawOriginal(0,0)"/></p>
 				<div id = "picRes"></div>
 				<div id = "endRes"></div>
-	 			<div id = "quantOfScreens"></div>
+				<div id = "quantOfScreens"></div>
+                <p><button id="send" onclick="send()", class = "buttonInInf"><i class="fa fa-check"></i> Submit</button></p>					
+            </td>
+			<td class = "mainTd" valign="top"  >
+				<button class = "buttonImg" onclick = "stretchOrigX()"><i class="fa fa-arrows-h"></i></button>
+				<button class = "buttonImg" onclick = "stretchOrigY()"><i class="fa fa-arrows-v"></i></button>
+		 		<button class = "buttonImg" onclick = "makeTable(0,0), drawOriginal(0,0)"><i class="fa fa-expand"></i></button>
+				<button class = "buttonImg" onclick = "rotate()", class = "buttonRotate"><i class="fa fa-rotate-right"></i></button>
+				<p><canvas  id="origImg" name="origCanvas" style="border:1px solid #000000;"></canvas></p>
 			</td>
-			<td>
+			<td class = "mainTd" valign="top" >
+				<button class = "buttonImg" onclick = "stretchPrevX()"><i class="fa fa-arrows-h"></i></button>
+				<button class = "buttonImg" onclick = "stretchPrevY()"><i class="fa fa-arrows-v"></i></button>
+				<button class = "buttonImg" onclick = "stretchPrevXY()"><i class="fa fa-expand"></i></button>
+				<table id = "drawTable" class = "drawTable">
+					</table>
 			</td>
-			<td rowspan="2">
-				<canvas  id="origImg" name="origCanvas" style="border:1px solid #000000;"></canvas>
-			</td>
-		</tr>
+        </tr>
     </table>
 
-	<button onclick = "stretchPrevX()">Stretch to length</button>
-	<button onclick = "stretchPrevY()">Stretch to height</button>
-	<button onclick = "stretchPrevXY()">Maximum stretch</button>
-
-    <table id = "drawTable">
-	</table>
+    
     <script>
 
 		var multX = 0;		// Множитель по X
@@ -103,7 +159,7 @@
 			pic.onload = function()
 			{
 				var rect = origCanvas.getBoundingClientRect();
-				var sm = 320/pic.height;
+				var sm = 360/pic.height;
 
 				if (rotation == 0 || rotation == 2)
 					multX = (1-x/(pic.width*sm));
@@ -187,7 +243,7 @@
 			{
 				var origCan = document.getElementById("origImg");
 				var ctx = origCan.getContext("2d");
-				var sm = 320/pic.height;	// screen multiplier нужен что бы оригинальная картинка отображалась одного размера, размер зависит от соотношения сторон 
+				var sm = 360/pic.height;	// screen multiplier нужен что бы оригинальная картинка отображалась одного размера, размер зависит от соотношения сторон 
 				if (rotation == 0 || rotation == 2)
 				{
 					origCan.height = pic.height*sm;
@@ -257,9 +313,9 @@
 
 		function setScreenDiv(inum, jnum)	// Получить делитель экранов для отображения
 		{
-			if (inum <= 3 && jnum <= 3)
+			if (inum <= 2 && jnum <= 3)
 					screenDiv = 4;
-			if ((inum > 3 && inum <=6) || (jnum > 3 && jnum <=6))
+			if ((inum > 2 && inum <=6) || (jnum > 3 && jnum <=6))
 					screenDiv = 6;
 			if ((inum > 6) || (jnum > 6))
 					screenDiv = 8;

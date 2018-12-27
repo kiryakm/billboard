@@ -44,7 +44,7 @@ def upload():
     img = re.sub('data:image/png;base64,', '', img) #убираю лишнее из строки картинки
     with open("img/" + name + ".png", "wb") as fh:  #декодирую из base64 и сохраняю в папку img
         fh.write(base64.b64decode(img))
-    return render_template("index.html")
+    return render_template("index2.html")
 
 @app.route('/send', methods=['GET', 'POST'])  #загрузка картинки
 def send():
@@ -58,13 +58,13 @@ def send():
         except Exception as e:
             print(e)
     print("sending")
-    t = threading.Timer(5.0, Draw)  # через 5 секунд отправляю изображение на экран
+    t = threading.Timer(3.0, Draw)  # через 3 секунд отправляю изображение на экран
     t.start()                       # таймер нужен что бы дождаться загрузки всех изображений
     print("send")
 
 @app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template("index2.html")
 
 if __name__ == "__main__":
     app.run(debug = True)
