@@ -6,8 +6,6 @@ import os
 from PIL import Image
 import datetime
 
-DataPack = list()
-RawData = list()
 
 _port = serial.Serial()
 
@@ -35,7 +33,6 @@ def Connect():
         print("Ошибка открытия СОМ порта\n")
         sys.exit()
 
-
 def SendData(data):
     if data == None:
         print("Data is none")
@@ -54,24 +51,20 @@ def SendData(data):
 
 
 def ClearScreen(colorUpDown):
-    global DataPack
-    DataPack.clear()
+    DataPack = list()
     DataPack.append(0x88)
     DataPack.append(0x32)
     DataPack.append(0x03)
     DataPack.append(colorUpDown)
     DataPack.append(0x00)
     DataPack.append(0x00)
-    print("sending")
     SendData(DataPack)
-    print("send")
 
 
 def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packed):
     typeOfFile = path[-4:]
 
-    global DataPack
-
+    DataPack = list()
     Image_Data = list()
     w = 0
     h = 0
@@ -134,7 +127,6 @@ def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packe
     buff_b = [None] * w
     buff_w = [None] * w
 
-    temp = 0
     i = 0
     #print(len(Image_Data))
     while i < len(Image_Data) - offset:

@@ -26,27 +26,32 @@ function mouseMove(ev)
 	}
 }
 
+function temp(multX, multY)
+{
+	drawOriginal(multX, multY);
+	makeTable(multX, multY);
+}
+
 function redraw(x, y)		// Отрисовка при двежение мыши
 {
 	pic = new Image();
 	pic.onload = function()
 	{
-		var rect = origCanvas.getBoundingClientRect();
 		if (pic.height < pic.width)
-			var sm = 300/pic.height;	// screen multiplier нужен что бы оригинальная картинка отображалась одного размера, размер зависит от соотношения сторон 
+			var sm = 300 / pic.height;	// screen multiplier нужен что бы оригинальная картинка отображалась одного размера, размер зависит от соотношения сторон 
 		else
-			var sm = 300/pic.width;
+			var sm = 300 / pic.width;
 
 		if (rotation == 0 || rotation == 2)
-			multX = (1-x/(pic.width*sm));
+			multX = (1 - x / (pic.width * sm));
 		else
-			multX = (1-y/(pic.width*sm));
+			multX = (1 - y / (pic.width * sm));
 			
 		multY = multX;
-		drawOriginal(multX, multY);
-		makeTable(multX, multY)
 	}
 	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); 
+	drawOriginal(multX, multY);
+	makeTable(multX, multY);
 }
 
 function rotate()
@@ -78,13 +83,13 @@ function getId(i, j, inum, jnum)	// Получить Id canvas-а
 function getName(pic, i, j, inum, jnum)	// Получить название картинки
 {			
 	if (rotation == 0)
-		name = pic.width+"x"+pic.height+" "+i+"_"+j;
+		name = pic.width + "x" + pic.height + " " + i + "_" + j;
 	if (rotation == 1)
-		name = pic.width+"x"+pic.height+" "+i+"_"+(jnum-1-j);
+		name = pic.width + "x" + pic.height + " " + i + "_" + (jnum-1-j);
 	if (rotation == 2)
-		name =  pic.width+"x"+pic.height+" " + (inum-1-i) + '_' + (jnum-1-j);
+		name =  pic.width + "x" + pic.height + " " + (inum-1-i) + '_' + (jnum-1-j);
 	if (rotation == 3)
-		name = pic.width+"x"+pic.height+" " + (inum-1-i) + '_' + j;		
+		name = pic.width + "x" + pic.height + " " + (inum-1-i) + '_' + j;		
 	if  (document.getElementById('vert').checked == true)
 		return "Vert" + name;
 	if  (document.getElementById('hor').checked == true)
@@ -97,17 +102,17 @@ function rotateCtx(canvas)
 	if (rotation == 1)
 	{
 		ctx.translate(canvas.width, 0);
-		ctx.rotate(90*Math.PI / 180);
+		ctx.rotate(90 * Math.PI / 180);
 	}
 	if (rotation == 2)
 	{
 		ctx.translate(canvas.width, canvas.height);		
-		ctx.rotate(180*Math.PI / 180);
+		ctx.rotate(180 * Math.PI / 180);
 	}		
 	if (rotation == 3)
 	{
 		ctx.translate(0, canvas.height);	
-		ctx.rotate(270*Math.PI / 180);
+		ctx.rotate(270 * Math.PI / 180);
 	}			
 	return ctx;
 }
@@ -119,31 +124,31 @@ function drawOriginal(multX, multY)
 	{
 		var origCan = document.getElementById("origImg");
 		var ctx = origCan.getContext("2d");
+		//alert("pic height " + pic.height)
 		if (pic.height < pic.width)
-			var sm = 300/pic.height;	// screen multiplier нужен что бы оригинальная картинка отображалась одного размера, размер зависит от соотношения сторон 
+			var sm = 300 / pic.height;	// screen multiplier нужен что бы оригинальная картинка отображалась одного размера, размер зависит от соотношения сторон 
 		else
-			var sm = 300/pic.width;
+			var sm = 300 / pic.width;
 		if (rotation == 0 || rotation == 2)
 		{
-			origCan.height = pic.height*sm;
-			origCan.width = pic.width*sm;
+			origCan.height = pic.height * sm;
+			origCan.width = pic.width * sm;
 		}
 		else
 		{
-			origCan.width = pic.height*sm;
-			origCan.heigth = pic.width*sm;
+			origCan.width = pic.height * sm;
+			origCan.heigth = pic.width * sm;
 		}
-		
-		ctx = rotateCtx(origCan)
+		ctx = rotateCtx(origCan);
 
 		if (rotation == 0)
 			ctx.drawImage(pic, 0, 0, origCan.width - multX * origCan.width, origCan.height - multY * origCan.height);			
 		if (rotation == 1)
-			ctx.drawImage(pic, 0,  0, origCan.height - multY * origCan.height, origCan.width - multX * origCan.width);
+			ctx.drawImage(pic, 0, 0, origCan.height - multY * origCan.height, origCan.width - multX * origCan.width);
 		if (rotation == 2)
 			ctx.drawImage(pic, 0, 0, origCan.width - multX * origCan.width, origCan.height - multY * origCan.height);		
 		if (rotation == 3)
-			ctx.drawImage(pic, 0,  0, origCan.height - multY * origCan.height, origCan.width - multX * origCan.width);
+			ctx.drawImage(pic, 0, 0, origCan.height - multY * origCan.height, origCan.width - multX * origCan.width);
 	}
 	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
 }
@@ -170,7 +175,13 @@ function stretchOrigY ()
 	else
 		makeTable(multY, multX);
 }
-
+function stretchOrigXY ()
+{
+	multX = 0
+	multY = 0
+	makeTable(multX, multY)
+	drawOriginal(multX,multY)
+}
 // Растянуть картинку на экранах
 function stretchPrevX ()
 {
@@ -187,6 +198,7 @@ function stretchPrevY ()
 function stretchPrevXY ()
 {				
 	mode = 3;
+	
 	draw(multX, multY);
 }
 
@@ -203,10 +215,13 @@ function setScreenDiv(inum, jnum)	// Получить делитель экра�
 function getInf(height, width, inum, jnum)	// Получить информацию
 {
 	pic = new Image();
+	pic.onload = function() 
+	{
+		document.getElementById("picRes").innerHTML = "Uploaded image resalution: " + pic.width + "x" + pic.height;
+		document.getElementById("endRes").innerHTML = "Resalution of screens: " + width*jnum + "x" + height*inum;
+		document.getElementById("quantOfScreens").innerHTML = "Quantity of screens: " + inum*jnum;
+	}
 	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
-	document.getElementById("picRes").innerHTML = "Uploaded image resalution: " + pic.width + "x" + pic.height;
-	document.getElementById("endRes").innerHTML = "Resalution of screens: " + width*jnum + "x" + height*inum;
-	document.getElementById("quantOfScreens").innerHTML = "Quantity of screens: " + inum*jnum;
 }
 
 function getHW()	// Получить высоту и ширину 
@@ -214,7 +229,7 @@ function getHW()	// Получить высоту и ширину
 	var HW = []
 	if  (document.getElementById("hor").checked==true)
 	{
-		HW[0] = 960;	// height
+		HW[0] = 960;	// height		
 		HW[1] = 1280	// width
 	}
 	if  (document.getElementById("vert").checked==true)
@@ -232,48 +247,52 @@ function makeTable(multX, multY)
 	var inum, jnum;
 	
 	pic = new Image();
-	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
-	if (rotation == 0 || rotation == 2)
-	{
-		inum = Math.ceil((pic.height - multY * (pic.height))/height);	// Число строк
-		jnum = Math.ceil((pic.width - multX * (pic.width))/width);		// Число столбцов
-	}
-	else
-	{
-		jnum = Math.ceil((pic.height - multY * (pic.height))/width);	// Число строк
-		inum = Math.ceil((pic.width - multX * (pic.width))/height);		// Число столбцов
-	}
-
-	setScreenDiv(inum, jnum);
-	getInf(height, width, inum, jnum);
-
-	var table = document.getElementById('drawTable');
-	for (var i = 0; i < inum+jnum; i++)		// Удаляем старую таблицу
-	{
-		var idRow= "tr"+i;
-		if (document.getElementById(idRow))
-			document.getElementById(idRow).remove();
-	}
-
-	for (var i = 0; i < inum; i++)		// Формируем таблицу для вывода
-	{
-		var idRow= "tr"+i;
-		var newRow = document.createElement('tr');
-		newRow.id = idRow;
-		table.appendChild(newRow);
-		for (var j = 0; j < jnum; j++)
+	pic.onload = function() 
+	{		
+		if (rotation == 0 || rotation == 2)
 		{
-			var idCol = "td"+i+"_"+j;
-			var newCol = document.createElement('td');
-			newCol.id = idCol;
-			var str = '<canvas id="canvas'+ i + '_' + j + '" height="' + height/screenDiv + '" width="'+ width/screenDiv + '" style="border:1px solid #000000;"></canvas>'
-			newCol.innerHTML += str;
-			newRow.appendChild(newCol);
+			inum = Math.ceil((this.height - multY * (this.height)) / height);	// Число строк
+			jnum = Math.ceil((this.width - multX * (this.width))/width);		// Число столбцов
 		}
-	}
+		else
+		{
+			jnum = Math.ceil((pic.height - multY * (pic.height))/width);	// Число строк
+			inum = Math.ceil((pic.width - multX * (pic.width))/height);		// Число столбцов
+		}
+		setScreenDiv(inum, jnum);
+		getInf(height, width, inum, jnum);
 
-	mode = 0;
+		var table = document.getElementById('drawTable');
+		for (var i = 0; i < inum+jnum; i++)		// Удаляем старую таблицу
+		{
+			var idRow= "tr" + i;
+			if (document.getElementById(idRow))
+				document.getElementById(idRow).remove();
+		}
+
+		for (var i = 0; i < inum; i++)		// Формируем таблицу для вывода
+		{
+			var idRow= "tr" + i;
+			var newRow = document.createElement('tr');
+			newRow.id = idRow;
+			table.appendChild(newRow);
+			for (var j = 0; j < jnum; j++)
+			{
+				var idCol = "td" + i + "_" + j;
+				var newCol = document.createElement('td');
+				newCol.id = idCol;
+				var str = '<canvas id="canvas'+ i + '_' + j + '" height="' + height/screenDiv + '" width="'+ width/screenDiv + '" style="border:1px solid #000000;"></canvas>'
+				newCol.innerHTML += str;
+				newRow.appendChild(newCol);
+			}
+		}
+
+		mode = 0;
+	}
+	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
+	
 	draw(multX, multY);
+		
 }
 
 function draw(multX, multY)
@@ -302,22 +321,26 @@ function draw(multX, multY)
 				var canId = getId(i, j, inum, jnum);
 
 				var canvas = document.getElementById(canId);
-				var ctx = canvas.getContext("2d");
-				ctx.fillStyle = "#FFFFFF";	
-				ctx.fillRect(0,0, canvas.width, canvas.height);	// Заполнить canvas белым
-				// Отрисовать поверх
-				drawing(canvas, pic, sumW, sumH, inum, jnum, multX, multY, screenDiv, height, width, mode);
-				
-				if (rotation == 0 || rotation == 2)
-					sumW += canvas.width;	//0 180
-				else 
-					sumH += canvas.width;	//90 270
+				if (canvas != null)
+				{
+					var ctx = canvas.getContext("2d");
+					ctx.fillStyle = "#FFFFFF";	
+					ctx.fillRect(0,0, canvas.width, canvas.height);	// Заполнить canvas белым
+					// Отрисовать поверх
+					drawing(canvas, pic, sumW, sumH, inum, jnum, multX, multY, screenDiv, height, width, mode);
+					
+					if (rotation == 0 || rotation == 2)
+						sumW += canvas.width;	//0 180
+					else 
+						sumH += canvas.width;	//90 270
+				}
 			}
 			var canvas = document.getElementById("canvas0_0");
 			if (rotation == 0 || rotation == 2)
 				sumH += canvas.height;	//0 180
 			else 
 				sumW += canvas.height;	//90 270
+				
 		}
 	}
 	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); 
@@ -376,7 +399,7 @@ function drawing(canvas, pic, sumW, sumH, inum, jnum, multX, multY, screenDiv, h
 }
 
 
-function send(multX, multY)   //посылаю на сервер json с картинкой закодированной в base64
+function send()   //посылаю на сервер json с картинкой закодированной в base64
 /* увеличиваю canvas-ы до их оригинального размера и отрисовываю в них картинку оригинального размера
 содержимое canvas-ов отправляю на сервер, уменьшаю canvas-ы и отрисовываю уменьшенную картинку
 */
