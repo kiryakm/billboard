@@ -63,7 +63,7 @@ def ClearScreen(colorUpDown):
 
 def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packed):
     typeOfFile = path[-4:]
-
+    print(path)
     DataPack = list()
     Image_Data = list()
     w = 0
@@ -183,6 +183,7 @@ def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packe
             # DataPack.clear()
 
     SendData(DataPack)
+    #SaveDataToBin(DataPack)
     DataPack.clear()
     DataPack.append(0x00)
     DataPack.append(0x00)
@@ -191,9 +192,12 @@ def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packe
     _port.close()
 
 
+def SaveDataToBin(DataPack):
+    file = open("C:/Users/Yakimenko.K.A/Documents/PyProjects/billboard/img/1.bin", "wb")
+    file.write(bytearray(DataPack))
 
-# Connect()
-# ClearScreen(15)
+# #Connect()
+# #ClearScreen(15)
 # p = "C:/Users/Yakimenko.K.A/Documents/PyProjects/billboard/img/"
 # path = list()
 # for root, dirs, files in os.walk(p):
@@ -213,13 +217,13 @@ def Load(path, xCoord, yCoord, rotationAngle, wave, black, white, Partial, Packe
 # Packed = True
 #
 # Load(path[0], 0, 0, rotationAngle, wave, black, white, Partial, Packed)
-#
-# # print(datetime.datetime.now())
-# # y = 0
-# # while y < 960:
-# #     x = 0
-# #     while x < 1280:
-# #         Load(path[0], x, y, rotationAngle, wave, black, white, Partial, Packed)
-# #         x += width
-# #     y += height
-# # print(datetime.datetime.now())
+
+# print(datetime.datetime.now())
+# y = 0
+# while y < 960:
+#     x = 0
+#     while x < 1280:
+#         Load(path[0], x, y, rotationAngle, wave, black, white, Partial, Packed)
+#         x += width
+#     y += height
+# print(datetime.datetime.now())

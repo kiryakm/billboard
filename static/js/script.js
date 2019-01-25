@@ -4,6 +4,7 @@ var screenDiv = 4;	// Делитель экранов для отображен�
 var mode = 0;		// Для растяжения финальной картинки 0 - норм, 1 - растяжение по X, 2 - по Y, 3 - максимальное растяжение
 var rotation = 0;	// 0-0 1-90 2-180 3-270
 
+var click;
 
 function canvasDown(ev)
 {
@@ -14,7 +15,7 @@ function canvasUp(ev)
 	click = false;
 }
 
-function mouseMove(ev)	
+function mouseMove(ev)
 {
 	if (click == true)
 	{
@@ -26,51 +27,62 @@ function mouseMove(ev)
 	}
 }
 
-function temp(multX, multY)
-{
-	drawOriginal(multX, multY);
-	makeTable(multX, multY);
-}
+var temp = 0;
 
 function redraw(x, y)		// Отрисовка при двежение мыши
 {
+
+	var height = getHW()[0];
+	var width = getHW()[1];
+
+	var inum = document.getElementById('drawTable').rows.length;
+	var jnum = document.getElementById('drawTable').rows[0].cells.length;
+
 	pic = new Image();
+	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
 	pic.onload = function()
 	{
-		if (pic.height < pic.width)
-			var sm = 300 / pic.height;	// screen multiplier нужен что бы оригинальная картинка отображалась одного размера, размер зависит от соотношения сторон 
+		if (this.height < this.width)
+			var sm = 300 / this.height;	// screen multiplier нужен что бы оригинальная картинка отображалась одного размера, размер зависит от соотношения сторон
 		else
-			var sm = 300 / pic.width;
+			var sm = 300 / this.width;
 
 		if (rotation == 0 || rotation == 2)
-			multX = (1 - x / (pic.width * sm));
+			multX = (1 - x / (this.width * sm));
 		else
-			multX = (1 - y / (pic.width * sm));
-			
+			multX = (1 - y / (this.width * sm));
+
 		multY = multX;
+
+		drawOriginal(multX, multY);
+		makeTable(multX, multY);
+		// Wdiv = Math.round(100*(this.width * (1 - multX)) / width)/100;
+		// Hdiv = Math.round(100*(this.height * (1 - multX)) / height)/100;
+		// if (((Wdiv < jnum-1 && Wdiv > jnum-1.05) || Wdiv > jnum) || ((Hdiv < inum-1 && Hdiv > inum-1.05) || Hdiv > inum))
+		// 	makeTable(multX, multY);
+		// draw(multX, multY);
 	}
-	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); 
-	drawOriginal(multX, multY);
-	makeTable(multX, multY);
 }
 
 function rotate()
-{	
+{
 	multX = 0;
 	multY = 0;
 	var origCan = document.getElementById("origImg");
+	var ctx = origCan.getContext("2d");
 	rotation += 1;
 	if (rotation == 4)
 		rotation = 0;
 	var s = origCan.height;
 	origCan.height = origCan.width;
-	origCan.width = s;			
+	origCan.width = s;
+	ctx = rotateCtx(origCan);
 	drawOriginal(multX, multY);
 	makeTable(multX, multY);
 }
 
 function getId(i, j, inum, jnum)	// Получить Id canvas-а
-{			
+{
 	if (rotation == 0)
 		return 'canvas'+ i + '_' + j;
 	if (rotation == 1)
@@ -81,7 +93,7 @@ function getId(i, j, inum, jnum)	// Получить Id canvas-а
 		return 'canvas'+ (inum-1-i) + '_' + j;
 }
 function getName(pic, i, j, inum, jnum)	// Получить название картинки
-{			
+{
 	if (rotation == 0)
 		name = pic.width + "x" + pic.height + " " + i + "_" + j;
 	if (rotation == 1)
@@ -89,15 +101,15 @@ function getName(pic, i, j, inum, jnum)	// Получить название к�
 	if (rotation == 2)
 		name =  pic.width + "x" + pic.height + " " + (inum-1-i) + '_' + (jnum-1-j);
 	if (rotation == 3)
-		name = pic.width + "x" + pic.height + " " + (inum-1-i) + '_' + j;		
+		name = pic.width + "x" + pic.height + " " + (inum-1-i) + '_' + j;
 	if  (document.getElementById('vert').checked == true)
-		return "Vert" + name;
+		return "ver" + name;
 	if  (document.getElementById('hor').checked == true)
-		return "Hor" + name;		
+		return "hor" + name;
 }
 
 function rotateCtx(canvas)
-{				
+{
 	var ctx = canvas.getContext("2d");
 	if (rotation == 1)
 	{
@@ -106,51 +118,67 @@ function rotateCtx(canvas)
 	}
 	if (rotation == 2)
 	{
-		ctx.translate(canvas.width, canvas.height);		
+		ctx.translate(canvas.width, canvas.height);
 		ctx.rotate(180 * Math.PI / 180);
-	}		
+	}
 	if (rotation == 3)
 	{
-		ctx.translate(0, canvas.height);	
+		ctx.translate(0, canvas.height);
 		ctx.rotate(270 * Math.PI / 180);
-	}			
+	}
 	return ctx;
+}
+
+function setOrigCanSize()
+{
+	var origCan = document.getElementById("origImg");
+	pic = new Image();
+	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
+	pic.onload = function()
+	{
+		
+	}
+	drawOriginal(0, 0);
 }
 
 function drawOriginal(multX, multY)
 {
 	pic = new Image();
+	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
 	pic.onload = function()
 	{
 		var origCan = document.getElementById("origImg");
 		var ctx = origCan.getContext("2d");
-		//alert("pic height " + pic.height)
-		if (pic.height < pic.width)
-			var sm = 300 / pic.height;	// screen multiplier нужен что бы оригинальная картинка отображалась одного размера, размер зависит от соотношения сторон 
+
+		if (this.height < this.width)
+			var sm = 300 / this.height;	// screen multiplier нужен что бы оригинальная картинка отображалась одного размера, размер зависит от соотношения сторон
 		else
-			var sm = 300 / pic.width;
+			var sm = 300 / this.width;
 		if (rotation == 0 || rotation == 2)
 		{
-			origCan.height = pic.height * sm;
-			origCan.width = pic.width * sm;
+			origCan.height = this.height * sm;
+			origCan.width = this.width * sm;
 		}
 		else
 		{
-			origCan.width = pic.height * sm;
-			origCan.heigth = pic.width * sm;
+			origCan.width = this.height * sm;
+			origCan.heigth = this.width * sm;
 		}
 		ctx = rotateCtx(origCan);
-
+		ctx.fillStyle = "#FFFFFF";
+		if (rotation == 0 || rotation == 2)
+			ctx.clearRect(0,0, origCan.width, origCan.height);	// Заполнить canvas белым
+		else
+			ctx.clearRect(0,0, origCan.height, origCan.width);	// Заполнить canvas белым
 		if (rotation == 0)
-			ctx.drawImage(pic, 0, 0, origCan.width - multX * origCan.width, origCan.height - multY * origCan.height);			
+			ctx.drawImage(this, 0, 0, origCan.width - multX * origCan.width, origCan.height - multY * origCan.height);
 		if (rotation == 1)
-			ctx.drawImage(pic, 0, 0, origCan.height - multY * origCan.height, origCan.width - multX * origCan.width);
+			ctx.drawImage(this, 0, 0, origCan.height - multY * origCan.height, origCan.width - multX * origCan.width);
 		if (rotation == 2)
-			ctx.drawImage(pic, 0, 0, origCan.width - multX * origCan.width, origCan.height - multY * origCan.height);		
+			ctx.drawImage(this, 0, 0, origCan.width - multX * origCan.width, origCan.height - multY * origCan.height);
 		if (rotation == 3)
-			ctx.drawImage(pic, 0, 0, origCan.height - multY * origCan.height, origCan.width - multX * origCan.width);
+			ctx.drawImage(this, 0, 0, origCan.height - multY * origCan.height, origCan.width - multX * origCan.width);
 	}
-	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
 }
 
 // Растянуть оригинальную картинку
@@ -196,9 +224,8 @@ function stretchPrevY ()
 }
 
 function stretchPrevXY ()
-{				
+{
 	mode = 3;
-	
 	draw(multX, multY);
 }
 
@@ -215,21 +242,21 @@ function setScreenDiv(inum, jnum)	// Получить делитель экра�
 function getInf(height, width, inum, jnum)	// Получить информацию
 {
 	pic = new Image();
-	pic.onload = function() 
+	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
+	pic.onload = function()
 	{
-		document.getElementById("picRes").innerHTML = "Uploaded image resalution: " + pic.width + "x" + pic.height;
+		document.getElementById("picRes").innerHTML = "Uploaded image resalution: " + this.width + "x" + this.height;
 		document.getElementById("endRes").innerHTML = "Resalution of screens: " + width*jnum + "x" + height*inum;
 		document.getElementById("quantOfScreens").innerHTML = "Quantity of screens: " + inum*jnum;
 	}
-	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
 }
 
-function getHW()	// Получить высоту и ширину 
+function getHW()	// Получить высоту и ширину
 {
 	var HW = []
 	if  (document.getElementById("hor").checked==true)
 	{
-		HW[0] = 960;	// height		
+		HW[0] = 960;	// height
 		HW[1] = 1280	// width
 	}
 	if  (document.getElementById("vert").checked==true)
@@ -245,10 +272,11 @@ function makeTable(multX, multY)
 	var height = getHW()[0];
 	var width = getHW()[1];
 	var inum, jnum;
-	
+
 	pic = new Image();
-	pic.onload = function() 
-	{		
+	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
+	pic.onload = function()
+	{
 		if (rotation == 0 || rotation == 2)
 		{
 			inum = Math.ceil((this.height - multY * (this.height)) / height);	// Число строк
@@ -256,8 +284,8 @@ function makeTable(multX, multY)
 		}
 		else
 		{
-			jnum = Math.ceil((pic.height - multY * (pic.height))/width);	// Число строк
-			inum = Math.ceil((pic.width - multX * (pic.width))/height);		// Число столбцов
+			jnum = Math.ceil((this.height - multY * (this.height))/width);	// Число строк
+			inum = Math.ceil((this.width - multX * (this.width))/height);		// Число столбцов
 		}
 		setScreenDiv(inum, jnum);
 		getInf(height, width, inum, jnum);
@@ -288,32 +316,30 @@ function makeTable(multX, multY)
 		}
 
 		mode = 0;
+		draw(multX, multY);
 	}
-	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
-	
-	draw(multX, multY);
-		
+
 }
 
 function draw(multX, multY)
 {
 	var inum = document.getElementById('drawTable').rows.length;
 	var jnum = document.getElementById('drawTable').rows[0].cells.length;
-	
+
 	var height = getHW()[0];
 	var width = getHW()[1];
 
 	pic = new Image();
-	pic.onload = function()   
+	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
+	pic.onload = function()
 	{
-		
 		var sumH = 0;//0
 		var sumW = 0;//90
 		for (var i = 0; i < inum; i++)
 		{
 			if (rotation == 0 || rotation == 2)
 				sumW = 0;//0;
-			else 
+			else
 				sumH = 0;//90
 
 			for (var j = 0; j < jnum; j++)
@@ -324,70 +350,68 @@ function draw(multX, multY)
 				if (canvas != null)
 				{
 					var ctx = canvas.getContext("2d");
-					ctx.fillStyle = "#FFFFFF";	
+					ctx = rotateCtx(canvas);
+					ctx.fillStyle = "#FFFFFF";
 					ctx.fillRect(0,0, canvas.width, canvas.height);	// Заполнить canvas белым
 					// Отрисовать поверх
-					drawing(canvas, pic, sumW, sumH, inum, jnum, multX, multY, screenDiv, height, width, mode);
-					
+					drawing(canvas, this, sumW, sumH, inum, jnum, multX, multY, screenDiv, height, width, mode);
+
 					if (rotation == 0 || rotation == 2)
 						sumW += canvas.width;	//0 180
-					else 
+					else
 						sumH += canvas.width;	//90 270
 				}
 			}
 			var canvas = document.getElementById("canvas0_0");
 			if (rotation == 0 || rotation == 2)
 				sumH += canvas.height;	//0 180
-			else 
+			else
 				sumW += canvas.height;	//90 270
-				
 		}
 	}
-	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); 
 }
 
 function drawing(canvas, pic, sumW, sumH, inum, jnum, multX, multY, screenDiv, height, width, mode)
 {
 	var ctx = canvas.getContext("2d");
 	if (rotation == 0)
-	{					
+	{
 		offsetX = 0;
 		offsetY = 0;
 	}
 	if (rotation == 1)
 	{
-		offsetX = 0;					
-		offsetY = jnum * width / screenDiv - (-multY+1) * pic.height/screenDiv;
+		offsetX = 0;
+		offsetY = jnum * width /  screenDiv - (-multY + 1) * pic.height/screenDiv;
 	}
 	if (rotation == 2)
 	{
-		offsetX = jnum * width / screenDiv - (-multX+1) * pic.width/screenDiv;
-		offsetY = inum * height / screenDiv - (-multY+1) * pic.height/screenDiv;
+		offsetX = jnum * width / screenDiv - (-multX + 1) * pic.width/screenDiv;
+		offsetY = inum * height / screenDiv - (-multY + 1) * pic.height/screenDiv;
 	}
 	if (rotation == 3)
 	{
-		offsetX = inum * height / screenDiv - (-multX+1) * pic.width/screenDiv;					
+		offsetX = inum * height / screenDiv - (-multX + 1) * pic.width/screenDiv;
 		offsetY = 0;
 	}
 	if (mode == 0)
 	{
-		ctx = rotateCtx(canvas);			
 		ctx.drawImage(pic, -(sumW)+offsetX, -(sumH)+offsetY, (pic.width/screenDiv) - multX * (pic.width/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
 		//ctx.drawImage(pic, -(sumW), -(sumH), (pic.width/screenDiv) - multX * (pic.width/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
 	}
 	if (mode == 1)
 	{
 		if (rotation == 0 || rotation == 2)
-			ctx.drawImage(pic, -(sumW), -(sumH)+offsetY, (jnum*width/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
+			ctx.drawImage(pic, -(sumW), -(sumH) + offsetY, (jnum * width / screenDiv), (pic.height / screenDiv) - multY * (pic.height / screenDiv));
 		if (rotation == 1 || rotation == 3)
-			ctx.drawImage(pic, -(sumW)+offsetX, -(sumH)+offsetY, (inum*height/screenDiv), (pic.height/screenDiv) - multY * (pic.height/screenDiv));
+			ctx.drawImage(pic, -(sumW) + offsetX, -(sumH) + offsetY, (inum * height / screenDiv), (pic.height / screenDiv) - multY * (pic.height / screenDiv));
 	}
 	if (mode == 2)
 	{
 		if (rotation == 0 || rotation == 2)
 			ctx.drawImage(pic, -(sumW)+offsetX, -(sumH), (pic.width/screenDiv) - multX * (pic.width/screenDiv), (inum*height/screenDiv));
 		if (rotation == 1 || rotation == 3)
-			ctx.drawImage(pic, -(sumW)+offsetX, -(sumH), (pic.width/screenDiv) - multX * (pic.width/screenDiv), (jnum*width/screenDiv));	
+			ctx.drawImage(pic, -(sumW)+offsetX, -(sumH), (pic.width/screenDiv) - multX * (pic.width/screenDiv), (jnum*width/screenDiv));
 	}
 	if (mode == 3)
 	{
@@ -407,75 +431,73 @@ function send()   //посылаю на сервер json с картинкой 
 	var inum = document.getElementById('drawTable').rows.length;
 	var jnum = document.getElementById('drawTable').rows[0].cells.length;
 	var height, width;
-	
+
 	var height = getHW()[0];
 	var width = getHW()[1];
 
 	pic = new Image();
-	pic.onload = function()   
+	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]);
+	pic.onload = function()
 	{
 		if (rotation == 0 || rotation == 2)
 			var sumH = 0;//0;
-		else 
+		else
 			var sumW = 0;//90
 
 		for (var i = 0; i < inum; i++)
 		{
 			if (rotation == 0 || rotation == 2)
 				var sumW = 0;//0;
-			else 
+			else
 				var sumH = 0;//90
 
 			var url;
 			for (var j = 0; j < jnum; j++)
 			{
-				
+
 				var canId = getId(i, j, inum, jnum);
 
 				var canvas = document.getElementById(canId);
 				var ctx = canvas.getContext("2d");
 
 				// Увеличиваю canvas-ы до оригинального размера(1280x960)
-				canvas.height = canvas.height*screenDiv;		
+				canvas.height = canvas.height*screenDiv;
 				canvas.width = canvas.width*screenDiv;
 				ctx.fillStyle = "#FFFFFF";
 				ctx.fillRect(0,0, canvas.width, canvas.height);
 				// Отрисовываю в них картинку оригинального размера
-				drawing(canvas,  pic, sumW*screenDiv, sumH*screenDiv, inum, jnum, multX, multY, 1, height, width, mode);
+				drawing(canvas,  this, sumW*screenDiv, sumH*screenDiv, inum, jnum, multX, multY, 1, height, width, mode);
 
 				url = document.getElementById(canId).toDataURL();   //беру url картинки из canvas
 				// формирую название картинки
-				upload(url, getName(pic, i, j, inum, jnum)); // url - url картинки из canvas, name - название картинки
-				
-				
+				upload(url, getName(this, i, j, inum, jnum)); // url - url картинки из canvas, name - название картинки
+
+
 				// Обратно уменьшаю
 				canvas.height = canvas.height/screenDiv;
 				canvas.width = canvas.width/screenDiv;
 				ctx.fillStyle = "#FFFFFF";
 				ctx.fillRect(0,0, canvas.width, canvas.height);
 
-				drawing(canvas,  pic, sumW, sumH, inum, jnum, multX, multY, screenDiv, height, width, mode);
+				drawing(canvas, this, sumW, sumH, inum, jnum, multX, multY, screenDiv, height, width, mode);
 
 				if (rotation == 0 || rotation == 2)
 					sumW += canvas.width;
-				else 
+				else
 					sumH += canvas.width;	//90
 			}
 			var canvas = document.getElementById("canvas0_0");
 			if (rotation == 0 || rotation == 2)
 				sumH += canvas.height;
-			else 
+			else
 				sumW += canvas.height;	//90
 		}
 	}
-	pic.src = URL.createObjectURL(document.getElementById('pic').files[0]); 
-	
+
 		$.ajax({
 		url: "/send",
 		type: 'GET'
 		});
-	
-
 }
 
 function upload(dataURL, name) //функция с ajax запросом
