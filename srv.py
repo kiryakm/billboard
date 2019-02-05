@@ -1,20 +1,31 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_mysqldb import MySQL
 import base64
 import re
 import threading
 import os
-
+import mysql.connector
 from Display import displayUSB as dispUSB
 from Display import displaySSH as dispSSH
 
 app = Flask(__name__)
+
+def connection():
+    conn = mysql.connector.connect(host="localhost",
+                               user = "root",
+                               passwd = "1234rewq",
+                               db = "users",port=3306)
+    cursor = conn.cursor()
+    return cursor, conn
+
+app.secret_key = '12345'
 
 host = '192.168.8.1'
 user = 'debian'
 pwd = 'temppwd'
 port = 22
 
-fromPath = "C:/Users/Yakimenko.K.A/Documents/PyProjects/billboard/img/" # Путь к директории с изображениями на этом устройстве
+fromPath = "./img/" # Путь к директории с изображениями на этом устройстве
 toPath = "/var/lib/cloud9/Projects/ver_0.2/ImageForPrint/"  # Путь к директории с изображениями на BeagleBone
 script = "/var/lib/cloud9/Projects/ver_0.2/main.py" # Полный путь к скрипту на BeagleBone
 xCoord = 0
@@ -95,10 +106,75 @@ def send():
     t.start()                           # таймер нужен что бы дождаться загрузки всех изображений
     return render_template("index2.html")
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        name = request.form['username']
+        pwd = request.form['password']
+        print(name, pwd)
+        try:
+            cursor, conn = connection()
+            print ("connected")
+            cursor.execute("SELECT userid FROM `users` where name = %s and password = %s", (name, pwd,))
+            print(cursor)
+            try:
+                out = list(cursor)
+                if len(out) == 1:
+                    session['id'] = out[0][0]
+                    session['username'] = name
+                    session['pass'] = pwd
+                    print(session)
+                    return redirect("edit")
+                else:
+                    return render_template("login.html")
+            except Exception as e:
+                print(str(e))
+                conn.rollback()
+        except Exception as e:
+            print (str(e))
+    return render_template("login.html")
+
 @app.route('/')
 def index():
+    if 'username' in session:
+        return redirect("edit")
+    else:
+        return redirect("login")
+
+@app.route('/edit')
+def edit():
     return render_template("index2.html")
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        name = request.form['username']
+        pwd = request.form['password']
+        email = request.form['email']
+        print(name, pwd, email)
+        try:
+            cursor, conn = connection()
+            print ("connected")
+            cursor.execute("SELECT * FROM `users` where name = %s or email = %s", (name, email,))
+            try: 
+                if len(list(cursor)) == 0:                
+                    cursor.execute("INSERT INTO `users`.`users`(`name`, `password`, `email`) \
+                        VALUES (%s, %s, %s)", (name, pwd, email,))
+                    return redirect("edit")
+                else:
+                    return render_template("login.html")
+            except Exception as e:
+                print(str(e))
+                conn.rollback()
+        except Exception as e:
+            print (str(e))
+    
+    return render_template("register.html")
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect("login")
 
 if __name__ == "__main__":
     app.run(debug = True)
-

@@ -1,3 +1,5 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:300);
+
 body, html{
     margin: 0;
     padding: 0;
@@ -5,13 +7,17 @@ body, html{
     
 }
 .container-fluid {
+    font-family: "Roboto", serif;
     min-height: 100%;
-    height:auto !important; /* cross-browser */
-    height: 100%; /* cross-browser */
+    height:auto !important;
+    height: 100%;
     }
-    .container-fluid1 {
-        height:auto !important; /* cross-browser */
-        }
+
+.container-fluid1 {
+    font-family: "Roboto", serif;
+    height:auto !important; 
+    }
+
 .infHead {
     background-color:  #3a80a7 ;
     color: white;
@@ -30,26 +36,45 @@ body, html{
 }
 
 .rows {
+    font-family: "Roboto", serif;
     text-align: center;
 }
 
 .inform {
+    font-family: "Roboto", serif;
     background-color: #222d32;
     color: white;
 }
 
 input[type="file"] {
+    font-family: "Roboto", serif;
     display: none;
 }
 
 .origImg {
+    font-family: "Roboto", serif;
     background-color: #fdfefe;
 }
 .screenImg {
+    font-family: "Roboto", serif;
     background-color: #fdfefe;
 }
 
+.buttonLogout {
+    font-family: "Roboto", serif;
+    background-color: #494d4e; 
+    margin-top: 5px;
+    border: none;
+    color: white;
+    padding: 4px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
 .buttonInf {
+    font-family: "Roboto", serif;
     background-color: #494d4e; 
     border: none;
     color: white;
@@ -60,6 +85,7 @@ input[type="file"] {
     font-size: 16px;
 }
 .buttonImg {
+    font-family: "Roboto", serif;
     margin: 5px;
     background-color: #1b2631;
     border: none;

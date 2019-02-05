@@ -97,7 +97,7 @@ width, height = img.size
 
 xCoord = 0
 yCoord = 0
-rotationAngle = 3   # 0-0 1-90 2-180 3-270
+rotationAngle = 0   # 0-0 1-90 2-180 3-270
 wave = 2            # 0 - 3 bit 0 - init_clear 1 - refresh 2 - delta 3 - refresh_mono 4 - delta_mono
 black = 0           # Черная корректировка значения: 0-15 в коде не использую если надо то можно добавить
 white = 0           # Белая корректировка значения: 0-15 в коде не использую если надо то можно добавить

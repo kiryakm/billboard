@@ -14,14 +14,17 @@
 </head>
 
 <body>
-<div class="row justify-content-center rowsHead "  >
+<div class="row justify-content-center rowsHead">
     <div class = "col-2 infHead"> <h1>Information</h1></div>
     <div class = "col-4 imgHead"> <h1>Original image</h1></div>
     <div class = "col-6 imgHead"> <h1>Screen preview</h1></div>
 </div>
 <div class="container-fluid h-100">
     <div class="row justify-content-center h-100 rows" >
-        <div class = "col-2 inform" >
+        <div class = "col-2 inform" >            
+            <form action="/logout" method="GET">    
+                <input class="buttonLogout" type="submit" value="Log out">
+            </form>
             <p><p><input type = "radio" name = "choose" id = "hor" value = "hor" onchange = "drawOriginal(0, 0), makeTable(0, 0)" > Horizontal</p></p>
             <p><input type = "radio" name = "choose" id = "vert" value = "vert" onchange = "drawOriginal(0, 0), makeTable(0, 0)"> Vertical</p>
 
@@ -39,7 +42,7 @@
             <button class = "buttonImg" onclick = "stretchOrigX()"><i class="fa fa-arrows-h"></i></button>
             <button class = "buttonImg" onclick = "stretchOrigY()"><i class="fa fa-arrows-v"></i></button>
             <button class = "buttonImg" onclick = "stretchOrigXY()"><i class="fa fa-expand"></i></button>
-
+            
             <button class = "buttonImg" onclick = "rotate()", class = "buttonRotate"><i class="fa fa-rotate-right"></i></button>
 
             <p><canvas  id="origImg" name="origCanvas" style="border:1px solid #000000;"></canvas></p>
